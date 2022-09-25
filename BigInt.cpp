@@ -165,6 +165,25 @@ BigInt BigInt::operator-() const{
     return x;
 }
 
+BigInt& BigInt::operator++(){
+    *this += BigInt(1);
+    return *this;
+}
+BigInt BigInt::operator++(int) {
+    BigInt x(*this);
+    *this += BigInt(1);
+    return x;
+}
+BigInt& BigInt::operator--(){
+    *this -= BigInt(1);
+    return *this;
+}
+BigInt BigInt::operator--(int) {
+    BigInt x(*this);
+    *this -= BigInt(1);
+    return x;
+}
+
 BigInt& BigInt::operator+=(const BigInt& num){
 
     if(this->_isPositive && !num._isPositive) // a + -b = a - b
@@ -328,6 +347,18 @@ BigInt& BigInt::operator*=(const BigInt& num){
 
 }
 
+BigInt operator+(const BigInt& num1, const BigInt& num2){
+    BigInt x(num1);
+    return x+=num2;
+}
+BigInt operator-(const BigInt& num1, const BigInt& num2){
+    BigInt x(num1);
+    return x-=num2;
+}
+BigInt operator*(const BigInt& num1, const BigInt& num2){
+    BigInt x(num1);
+    return x*=num2;
+}
 
 bool BigInt::operator==(const BigInt& num) const
 {
@@ -372,6 +403,12 @@ bool BigInt::operator>=(const BigInt& num) const
     if(!operator<(num))
         return true;
     return false;
+}
+
+BigInt::operator int() const{
+    if (this->_isPositive)
+        return this->_numberDigits[0];
+    else return -this->_numberDigits[0];
 }
 
 BigInt::~BigInt()

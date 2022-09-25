@@ -8,6 +8,11 @@
 #include <iostream>
 
 class BigInt{
+    friend BigInt operator+(const BigInt&, const BigInt&);
+    friend BigInt operator-(const BigInt&, const BigInt&);
+    friend BigInt operator*(const BigInt&, const BigInt&);
+
+
 private:
     unsigned long* _numberDigits;
     unsigned int _countOfDigits;
@@ -29,9 +34,18 @@ public:
     BigInt operator+() const;  // unary +
     BigInt operator-() const;  // unary -
 
+    BigInt& operator++();
+    BigInt operator++(int);
+    BigInt& operator--();
+    BigInt operator--(int);
+
+
     BigInt& operator+=(const BigInt&);
     BigInt& operator-=(const BigInt&);
     BigInt& operator*=(const BigInt&);
+
+
+
 
     // bool operations
     bool operator==(const BigInt&) const;
@@ -40,6 +54,8 @@ public:
     bool operator>(const BigInt&) const;
     bool operator<=(const BigInt&) const;
     bool operator>=(const BigInt&) const;
+
+    explicit operator int() const;
 
     ~BigInt();
 };
