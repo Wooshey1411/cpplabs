@@ -1,10 +1,4 @@
-//
-// Created by Admin on 13.09.2022.
-//
-
-#ifndef BIGINT_H
-#define BIGINT_H
-
+#pragma once
 #include <iostream>
 
 class BigInt{
@@ -18,8 +12,8 @@ private:
     unsigned int _countOfDigits;
     bool _isPositive;
 public:
-    unsigned long* numberDigits() {return _numberDigits;}
-    [[nodiscard]] unsigned int countOfDigits() const {return _countOfDigits;}
+    unsigned long* numberDigits() {return _numberDigits;} // delete in future
+    [[nodiscard]] unsigned int countOfDigits() const {return _countOfDigits;} // delete in future
     [[nodiscard]] bool isPositive() const {return _isPositive;}
     // constructors
     BigInt();
@@ -59,4 +53,4 @@ public:
 
     ~BigInt();
 };
-#endif //BIGINT_H
+

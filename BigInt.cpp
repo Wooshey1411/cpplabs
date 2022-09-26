@@ -1,15 +1,10 @@
-//
-// Created by Admin on 13.09.2022.
-//
-
 #include "BigInt.h"
 
 #include <memory>
 
-inline long long base = 4294967296;
+inline const unsigned long long base = static_cast<unsigned long long>(UINT_MAX)+1;
 
-unsigned long* Resize(unsigned long* a, unsigned int *size, unsigned int newSize) // how protect ?
-{
+unsigned long* resize(unsigned long* a, unsigned int *size, unsigned int newSize){
     auto* t = new unsigned long[newSize+1];
     std::copy(a, a + newSize, t);
     (*size) = newSize;
@@ -17,7 +12,7 @@ unsigned long* Resize(unsigned long* a, unsigned int *size, unsigned int newSize
     return t;
 }
 
-unsigned long* shift(unsigned  long* a, unsigned int *size){
+unsigned long* shift(const unsigned  long* a, unsigned int *size){
     auto* t = new unsigned long [*size + 1];
     for (int i = 0; i < *size; ++i)
         t[i+1] = a[i];
@@ -27,21 +22,19 @@ unsigned long* shift(unsigned  long* a, unsigned int *size){
     return  t;
 }
 
-BigInt abs(BigInt num){
+BigInt abs(const BigInt& num){
     if (num.isPositive())
         return num;
     else return -num;
 }
 
 BigInt::BigInt()
-    :_isPositive(true), _countOfDigits(1){
-    _numberDigits = new unsigned long[1];
+    :_isPositive(true), _countOfDigits(1),_numberDigits(new unsigned long[1]){
     _numberDigits[0] = 0;
 }
 
-BigInt::BigInt(long num){
-    _countOfDigits = 1;
-    _numberDigits = new unsigned long[2];
+BigInt::BigInt(long num)
+:_countOfDigits(1),_numberDigits(new unsigned long[1]){
     if(num < 0) {
         _isPositive = false;
         _numberDigits[0] = -num;
@@ -65,8 +58,7 @@ BigInt::BigInt(const std::string& num) {
     }
 
     _numberDigits = new unsigned long[0];
-    auto* newNumber = new unsigned char [num.size()];
-
+    auto newNumber = std::make_unique<unsigned char[]>(num.size());
     int currDigitPos = 0;
     _countOfDigits = 0;
     unsigned char shifter = 0;
@@ -92,7 +84,7 @@ BigInt::BigInt(const std::string& num) {
             temp = 10*temp + (newNumber[i]);
             if (temp >= base){
                 takeDigits = true;
-                newNumber[countOfNewDigits] = (unsigned char)(temp/base);
+                newNumber[countOfNewDigits] = static_cast<unsigned char>(temp/base); // newNumber values [0:9]
                 temp%=base;
                 countOfNewDigits++;
             }
@@ -101,8 +93,8 @@ BigInt::BigInt(const std::string& num) {
                 countOfNewDigits++;
             }
         }
-        _numberDigits = Resize(_numberDigits,&_countOfDigits,_countOfDigits + 1);
-        _numberDigits[currDigitPos] = temp; // temp after temp=%base cannot be more than 2^32. I can take in unsigned long a number like temp
+        _numberDigits = resize(_numberDigits,&_countOfDigits,_countOfDigits + 1);
+        _numberDigits[currDigitPos] = static_cast<unsigned long>(temp); // temp after temp=%base cannot be more than 2^32 - 1. I can take in unsigned long a number like temp
         currDigitPos++;
         length = countOfNewDigits;
         if(countOfNewDigits == 0)
@@ -134,6 +126,7 @@ BigInt& BigInt::operator=(const BigInt& num){
     if (this != &num) {
         this->_countOfDigits = num._countOfDigits;
         this->_isPositive = num._isPositive;
+        delete[] this->_numberDigits;
         this->_numberDigits = new unsigned long[num._countOfDigits];
         for (int i = 0; i < num._countOfDigits; ++i) {
             this->_numberDigits[i] = num._numberDigits[i];
@@ -203,7 +196,7 @@ BigInt& BigInt::operator+=(const BigInt& num){
     } else{
         maxLen = num._countOfDigits;
         minLen = this->_countOfDigits;
-        this->_numberDigits = Resize(this->_numberDigits, &this->_countOfDigits, num._countOfDigits);
+        this->_numberDigits = resize(this->_numberDigits, &this->_countOfDigits, num._countOfDigits);
         maxNum = &num;
     }
 
@@ -212,16 +205,16 @@ BigInt& BigInt::operator+=(const BigInt& num){
         unsigned long long tmp;
 
         if(i < minLen)
-            tmp = carry + (unsigned long long)this->_numberDigits[i] + (unsigned long long)num._numberDigits[i];
+            tmp = carry + static_cast<unsigned long long>(this->_numberDigits[i]) + static_cast<unsigned long long>(num._numberDigits[i]);
         else
-            tmp = (unsigned long long)maxNum->_numberDigits[i] + carry;
+            tmp = static_cast<unsigned long long>(maxNum->_numberDigits[i]) + carry;
 
-        this->_numberDigits[i] = tmp % base;
-        carry = tmp / base;
+        this->_numberDigits[i] = tmp % base; // tmp % base <= 2^32 - 1
+        carry = tmp / base; // carry is [0:1];
 
         if(i == maxLen - 1 && carry == 1) // 999 + 1 = 1000
         {
-            this->_numberDigits = Resize(this->_numberDigits, &this->_countOfDigits, this->_countOfDigits + 1);
+            this->_numberDigits = resize(this->_numberDigits, &this->_countOfDigits, this->_countOfDigits + 1);
             this->_numberDigits[maxLen] = 1;
         }
 
@@ -245,20 +238,20 @@ BigInt& BigInt::operator-=(const BigInt& num){
         maxLen = this->_countOfDigits;
         firstNum = this;
         secondNum = &num;
-    }else{ // |a| < |b|. If b - a => sign + (*this have sign -). If a - b => sign + (*this have sign +) -> we need resign this in both cases;
+    }else{ // |a| < |b|. If b - a => sign + (*this have sign -). If a - b => sign + (*this have sign +) -> we need resign *this in both cases;
         minLen = this->_countOfDigits;
         maxLen = num._countOfDigits;
         firstNum = &num;
         secondNum = this;
         this->_isPositive = !this->_isPositive;
     }
-    this->_numberDigits = Resize(this->_numberDigits, &this->_countOfDigits, maxLen);
+    this->_numberDigits = resize(this->_numberDigits, &this->_countOfDigits, maxLen);
 
     unsigned char debt = 0;
     for (int i = 0; i < maxLen; ++i) {
         long long tmp;
         if(i<minLen){
-            tmp = (long long)firstNum->_numberDigits[i] - (long long)secondNum->_numberDigits[i] -debt;
+            tmp = static_cast<long long>(firstNum->_numberDigits[i]) - static_cast<long long>(secondNum->_numberDigits[i]) -debt;
 
             if (tmp < 0)
             {
@@ -269,14 +262,14 @@ BigInt& BigInt::operator-=(const BigInt& num){
 
             this->_numberDigits[i] = tmp;
         }else{
-            if(firstNum->_numberDigits[i] == 0 && debt == 1){ // 10000 - 1
+            if(firstNum->_numberDigits[i] == 0 && debt == 1){ // 10000 - 1 there for second digit debt = 1 and digit = 0 => digit became a 9 (10 - 1);
                 this->_numberDigits[i] = base - 1;
-                debt = 1;
+            //    debt = 1;
             }
-            else if(firstNum->_numberDigits[i] != 0 && debt == 1) {
+            else if(firstNum->_numberDigits[i] != 0 && debt == 1) { // 19990 - 1 there for second digit debt = 1 and digit = 9 => digit = 8 and debt = 0
                 this->_numberDigits[i] = firstNum->_numberDigits[i] - 1;
                 debt = 0;
-            } else this->_numberDigits[i] = firstNum->_numberDigits[i];
+            } else this->_numberDigits[i] = firstNum->_numberDigits[i]; // 19991 - 1 there debt = 0 for 9
         }
     }
 
@@ -285,7 +278,7 @@ BigInt& BigInt::operator-=(const BigInt& num){
         if(this->_numberDigits[i] != 0)
             liveDigit = i;
 
-    this->_numberDigits = Resize(this->_numberDigits, &this->_countOfDigits, liveDigit + 1);
+    this->_numberDigits = resize(this->_numberDigits, &this->_countOfDigits, liveDigit + 1);
     return *this;
 
 }
@@ -305,7 +298,7 @@ BigInt& BigInt::operator*=(const BigInt& num){
 
     BigInt result;
     BigInt temp; // 124*24 = 124*2 * 10 + 124*4 temp is result of 124*2 after 124*4 it's one of step for multiply in table
-    temp._numberDigits = Resize(temp._numberDigits,&temp._countOfDigits, std::max(this->_countOfDigits,num._countOfDigits) + 1); // 999*9=8991 - 4 digits nax
+    temp._numberDigits = resize(temp._numberDigits,&temp._countOfDigits, std::max(this->_countOfDigits,num._countOfDigits) + 1); // 999*9=8991 - 4 digits nax
     const BigInt* firstNum;
     const BigInt* secondNum;
     unsigned int minLen;
@@ -327,9 +320,9 @@ BigInt& BigInt::operator*=(const BigInt& num){
         carry = 0;
         for (int j = 0; j < maxLen; ++j) {
             unsigned long long tmp; // (2^32 - 1)^2 + 2^32 < 2^64;
-            tmp = ((unsigned long long)secondNum->_numberDigits[i] * (unsigned long long)firstNum->_numberDigits[j]) + carry;
+            tmp = (static_cast<unsigned long long>(secondNum->_numberDigits[i]) * static_cast<unsigned long long>(firstNum->_numberDigits[j])) + carry;
             temp._numberDigits[j] = tmp % base;
-            carry = tmp / base;
+            carry = tmp / base; // (2^64-1) / (2^32 - 1) <= 2^32-1
           //  if (carry == 0 && j == maxLen - 1 && tmp != 0) // 99 + 1 = 100 where carry = 0
             //    carry = 1;
             if (j == maxLen - 1 && carry != 0 ) {
@@ -371,7 +364,7 @@ bool BigInt::operator==(const BigInt& num) const
     return true;
 }
 bool BigInt::operator!=(const BigInt& num) const{
-    return !operator==(num);
+    return !(*this == num);
 }
 bool BigInt::operator<(const BigInt& num) const{
     if (this->_isPositive && !num._isPositive || this->_countOfDigits > num._countOfDigits || operator==(num))
@@ -389,26 +382,26 @@ bool BigInt::operator<(const BigInt& num) const{
     return false;
 }
 bool BigInt::operator>(const BigInt& num) const{ // > ~ not < and not == because !< = >=
-    if(!operator<(num) && operator!=(num))
+    if(!(*this < num) && *this != num)
         return true;
     return false;
 }
 bool BigInt::operator<=(const BigInt& num) const{
-    if (!operator>(num))
+    if (!(*this > num))
         return true;
     return false;
 }
 bool BigInt::operator>=(const BigInt& num) const
 {
-    if(!operator<(num))
+    if(!(*this < num))
         return true;
     return false;
 }
 
 BigInt::operator int() const{
     if (this->_isPositive)
-        return this->_numberDigits[0];
-    else return -this->_numberDigits[0];
+        return (int)this->_numberDigits[0];
+    else return (int)-this->_numberDigits[0];
 }
 
 BigInt::~BigInt()
