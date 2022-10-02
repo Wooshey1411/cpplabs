@@ -5,14 +5,22 @@ class BigInt{
     friend BigInt operator+(const BigInt&, const BigInt&);
     friend BigInt operator-(const BigInt&, const BigInt&);
     friend BigInt operator*(const BigInt&, const BigInt&);
+    friend BigInt operator/(const BigInt&, const BigInt&);
+    friend BigInt operator%(const BigInt&, const BigInt&);
+    friend BigInt operator&(const BigInt&, const BigInt&);
+    friend BigInt operator|(const BigInt&, const BigInt&);
+
+    friend std::ostream& operator<<(std::ostream& s, const BigInt& i);
+    friend std::istream& operator>>(std::istream& s, BigInt& i);
 
 
 private:
-    unsigned long* _numberDigits;
+    unsigned char* _numberDigits;
     unsigned int _countOfDigits;
     bool _isPositive;
+    BigInt div (const BigInt& num, char mode);
 public:
-    unsigned long* numberDigits() {return _numberDigits;} // delete in future
+    unsigned char numberDigits(unsigned int position) {return _numberDigits[position];} // delete in future
     [[nodiscard]] unsigned int countOfDigits() const {return _countOfDigits;} // delete in future
     [[nodiscard]] bool isPositive() const {return _isPositive;}
     // constructors
@@ -24,9 +32,10 @@ public:
 
     BigInt& operator=(const BigInt&);
     BigInt& operator=(BigInt&&) noexcept;
-    // unary operations
+
     BigInt operator+() const;  // unary +
     BigInt operator-() const;  // unary -
+    BigInt operator~() const;
 
     BigInt& operator++();
     BigInt operator++(int);
@@ -37,7 +46,10 @@ public:
     BigInt& operator+=(const BigInt&);
     BigInt& operator-=(const BigInt&);
     BigInt& operator*=(const BigInt&);
-
+    BigInt& operator/=(const BigInt&);
+    BigInt& operator%=(const BigInt&);
+    BigInt& operator&=(const BigInt&);
+    BigInt& operator|=(const BigInt&);
 
 
 
@@ -50,6 +62,9 @@ public:
     bool operator>=(const BigInt&) const;
 
     explicit operator int() const;
+    operator std::string() const;
+    size_t size() const;
+
 
     ~BigInt();
 };
