@@ -1,10 +1,8 @@
 #include "BigInt.h"
-#include "StrNumPositive.h"
 
 #include <memory>
-
-const unsigned short base = static_cast<unsigned long long>(UCHAR_MAX)+1;
-
+const unsigned short basicBase = 256;
+const unsigned short decimalBase = 10;
 const unsigned char bytesInInt = sizeof(long);
 BigInt abs(const BigInt& num){
     if (num.isPositive())
@@ -40,6 +38,18 @@ unsigned int pow(unsigned int a, unsigned int deg){
         res*=a;
     }
     return res;
+}
+
+BigInt pow(BigInt& num,unsigned int deg, unsigned short base){
+    if (deg == 0)
+        return BigInt(1,base);
+    if (deg == 1)
+        return num;
+    BigInt ans(1,base);
+    for (unsigned int i = 0; i < deg; ++i) {
+        ans*=num;
+    }
+    return ans;
 }
 
 // mode 'i' integer part (62/3 = 20), mode 'r' - rest part (62%3 = 2)
@@ -98,12 +108,12 @@ BigInt BigInt::div (const BigInt& num, char mode){
 }
 
 BigInt::BigInt()
-    :_numberDigits(new unsigned char[1]), _countOfDigits(1),_isPositive(true){
+    :_numberDigits(new unsigned char[1]), _countOfDigits(1),_isPositive(true),base(basicBase){
     _numberDigits[0] = 0;
 }
 
-BigInt::BigInt(long num)
-:_numberDigits(new unsigned char[bytesInInt]){
+BigInt::BigInt(long num, unsigned short b)
+:_numberDigits(new unsigned char[bytesInInt]),base(Readonly(b)){
     if(num < 0)
         _isPositive = false;
     else
@@ -112,8 +122,8 @@ BigInt::BigInt(long num)
     unsigned long temp = abs(num);
     unsigned int len = 0;
     while(true){
-        _numberDigits[len] = temp % base;
-        temp/=base;
+        _numberDigits[len] = temp % base.getInstance();
+        temp/=base.getInstance();
         len++;
         if(temp == 0)
             break;
@@ -122,7 +132,28 @@ BigInt::BigInt(long num)
     _numberDigits = resize(_numberDigits, &_countOfDigits,len);
 }
 
-BigInt::BigInt(const std::string& num) {
+BigInt::BigInt(long num)
+:_numberDigits(new unsigned char[bytesInInt]),base(basicBase){
+    if(num < 0)
+        _isPositive = false;
+    else
+        _isPositive = true;
+
+    unsigned long temp = abs(num);
+    unsigned int len = 0;
+    while(true){
+        _numberDigits[len] = temp % base.getInstance();
+        temp/=base.getInstance();
+        len++;
+        if(temp == 0)
+            break;
+    }
+    _countOfDigits = bytesInInt;
+    _numberDigits = resize(_numberDigits, &_countOfDigits,len);
+}
+
+BigInt::BigInt(const std::string& num)
+:base(basicBase){
     size_t length = num.size();
 
 
@@ -160,10 +191,10 @@ BigInt::BigInt(const std::string& num) {
 
         for (size_t i = 0; i < length; ++i){
             temp = 10*temp + (newNumber[i]);
-            if (temp >= base){
+            if (temp >= base.getInstance()){
                 takeDigits = true;
-                newNumber[countOfNewDigits] = static_cast<unsigned char>(temp/base); // newNumber values [0:9]
-                temp%=base;
+                newNumber[countOfNewDigits] = static_cast<unsigned char>(temp/base.getInstance()); // newNumber values [0:9]
+                temp%=base.getInstance();
                 countOfNewDigits++;
             }
             else if (takeDigits){
@@ -185,7 +216,7 @@ BigInt::BigInt(const std::string& num) {
 }
 
 BigInt::BigInt(const BigInt& num)
-    :_countOfDigits(num._countOfDigits), _isPositive(num._isPositive){
+    :_countOfDigits(num._countOfDigits), _isPositive(num._isPositive),base(num.base.getInstance()){
     this->_numberDigits = new unsigned char[num._countOfDigits];
     for (unsigned int i = 0; i < num._countOfDigits; ++i) {
         this->_numberDigits[i] = num._numberDigits[i];
@@ -193,10 +224,11 @@ BigInt::BigInt(const BigInt& num)
 }
 
 BigInt::BigInt(BigInt&& num) noexcept
-    :_numberDigits(nullptr),_countOfDigits(0),_isPositive(false){
+    :_numberDigits(nullptr),_countOfDigits(0),_isPositive(false),base(0){
     _numberDigits = num._numberDigits;
     _countOfDigits = num._countOfDigits;
     _isPositive = num._isPositive;
+    base = Readonly(num.base.getInstance());
 
     num._numberDigits = nullptr;
     num._countOfDigits = 0;
@@ -299,8 +331,8 @@ BigInt& BigInt::operator+=(const BigInt& num){
         else
             tmp = static_cast<unsigned short>(maxNum->_numberDigits[i]) + carry;
 
-        this->_numberDigits[i] = tmp % base; // tmp % base <= 2^8 - 1
-        carry = tmp / base; // carry is [0:1];
+        this->_numberDigits[i] = tmp % base.getInstance(); // tmp % base <= 2^8 - 1
+        carry = tmp / base.getInstance(); // carry is [0:1];
 
         if(i == maxLen - 1 && carry == 1) // 999 + 1 = 1000
         {
@@ -345,7 +377,7 @@ BigInt& BigInt::operator-=(const BigInt& num){
 
             if (tmp < 0)
             {
-                tmp +=base;
+                tmp +=base.getInstance();
                 debt = 1;
             }else
                 debt = 0;
@@ -353,7 +385,7 @@ BigInt& BigInt::operator-=(const BigInt& num){
             this->_numberDigits[i] = static_cast<unsigned char>(tmp); // tmp <= base - 1;
         }else{
             if(firstNum->_numberDigits[i] == 0 && debt == 1) // 10000 - 1 there for second digit debt = 1 and digit = 0 => digit became a 9 (10 - 1);
-                this->_numberDigits[i] = base - 1;
+                this->_numberDigits[i] = base.getInstance() - 1;
             else if(firstNum->_numberDigits[i] != 0 && debt == 1) { // 19990 - 1 there for second digit debt = 1 and digit = 9 => digit = 8 and debt = 0
                 this->_numberDigits[i] = firstNum->_numberDigits[i] - 1;
                 debt = 0;
@@ -413,8 +445,8 @@ BigInt& BigInt::operator*=(const BigInt& num){
         for (unsigned int j = 0; j < maxLen; ++j) {
             unsigned short tmp; // (2^8- 1)^2 + 2^8 < 2^16;
             tmp = (static_cast<unsigned short>(secondNum->_numberDigits[i]) * static_cast<unsigned short>(firstNum->_numberDigits[j])) + carry;
-            temp._numberDigits[j] = static_cast<unsigned short>(tmp % base); // base = 256 -> tmp % base <=255
-            carry = tmp / base; // (2^16-1) / (2^8) <= 2^8-1
+            temp._numberDigits[j] = static_cast<unsigned short>(tmp % base.getInstance()); // base = 256 -> tmp % base <=255
+            carry = tmp / base.getInstance(); // (2^16-1) / (2^8) <= 2^8-1
             if (j == maxLen - 1 && carry != 0 ) {
                 temp._numberDigits[maxLen] = carry; // 12*9  = 108
                 temp._countOfDigits++;
@@ -550,7 +582,7 @@ BigInt::operator int() const{
     unsigned char pos = 0;
     int res = 0;
     while(true){
-        res+= this->_numberDigits[pos]*pow(base,pos);
+        res+= this->_numberDigits[pos]*pow(base.getInstance(),pos);
         pos++;
         if(pos == 4 || pos == this->_countOfDigits)
             break;
@@ -560,21 +592,21 @@ BigInt::operator int() const{
     return res;
 }
 BigInt::operator std::string() const{
-    StrNumPositive str;
-    StrNumPositive baseStr(base);
+    BigInt str(0,decimalBase);
+    BigInt baseStr(this->base.getInstance(),decimalBase);
 
     for (unsigned int i = 0; i < this->_countOfDigits; ++i) {
-        str += (StrNumPositive(this->_numberDigits[i]) * StrNumPositive::pow(baseStr,i));
+        str += (BigInt(this->_numberDigits[i],decimalBase) * pow(baseStr,i,baseStr.base.getInstance()));
     }
     std::string ans;
     unsigned char signShifter = 0;
     if (!this->_isPositive)
         signShifter = 1;
-    ans.resize(str.length() + signShifter);
+    ans.resize(str._countOfDigits + signShifter);
     if(signShifter == 1)
         ans[0] = '-';
-    for (unsigned int i = signShifter; i < str.length()+signShifter; ++i) {
-        ans[i]= str.digits(str.length()-i-1+signShifter)+'0';
+    for (unsigned int i = signShifter; i < str._countOfDigits+signShifter; ++i) {
+        ans[i]= str._numberDigits[str._countOfDigits-i-1+signShifter]+'0';
     }
 
     return ans;

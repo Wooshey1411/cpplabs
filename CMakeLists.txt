@@ -17,7 +17,7 @@ else()
 endif()
 
 
-add_library(corelib OBJECT src/BigInt.cpp src/StrNumPositive.cpp)
+add_library(corelib OBJECT src/BigInt.cpp src/Readonly.cpp)
 
 add_executable(${exe_name} src/main.cpp)
 target_link_libraries(${exe_name} corelib)

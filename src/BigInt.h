@@ -4,16 +4,15 @@
 
 class BigInt{
 
-    friend std::ostream& operator<<(std::ostream& s, const BigInt& i);
-    friend std::istream& operator>>(std::istream& s, BigInt& i);
-
+    friend BigInt pow(BigInt& num,unsigned int deg, unsigned short base); // pow for BigInt with base = 10
 
 private:
+    BigInt(long,unsigned short);
     unsigned char* _numberDigits;
     unsigned int _countOfDigits;
     bool _isPositive;
     BigInt div (const BigInt& num, char mode);
-
+    Readonly base;
 public:
     unsigned char numberDigits(unsigned int position) {return _numberDigits[position];} // delete in future
     [[nodiscard]] unsigned int countOfDigits() const {return _countOfDigits;} // delete in future
@@ -71,3 +70,5 @@ BigInt operator/(const BigInt&, const BigInt&);
 BigInt operator%(const BigInt&, const BigInt&);
 BigInt operator&(const BigInt&, const BigInt&);
 BigInt operator|(const BigInt&, const BigInt&);
+std::ostream& operator<<(std::ostream& s, const BigInt& i);
+std::istream& operator>>(std::istream& s, BigInt& i);
