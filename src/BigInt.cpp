@@ -5,6 +5,7 @@
 
 const unsigned short base = static_cast<unsigned long long>(UCHAR_MAX)+1;
 
+const unsigned char bytesInInt = sizeof(long);
 BigInt abs(const BigInt& num){
     if (num.isPositive())
         return num;
@@ -78,11 +79,9 @@ BigInt BigInt::div (const BigInt& num, char mode){
         } else if (takeDigits){
             ans._numberDigits = shift(ans._numberDigits, &ans._countOfDigits);
             ans._numberDigits[0] = 0;
-
         }
     }
 
-    //temp._isPositive = !(this->_isPositive ^ num._isPositive);
     ans._isPositive = !(this->_isPositive ^ num._isPositive);
 
     if (mode == 'i')
@@ -104,7 +103,7 @@ BigInt::BigInt()
 }
 
 BigInt::BigInt(long num)
-:_numberDigits(new unsigned char[9]){
+:_numberDigits(new unsigned char[bytesInInt]){
     if(num < 0)
         _isPositive = false;
     else
@@ -119,7 +118,7 @@ BigInt::BigInt(long num)
         if(temp == 0)
             break;
     }
-    _countOfDigits = 15;
+    _countOfDigits = bytesInInt;
     _numberDigits = resize(_numberDigits, &_countOfDigits,len);
 }
 
@@ -127,14 +126,12 @@ BigInt::BigInt(const std::string& num) {
     size_t length = num.size();
 
 
-    if((!isdigit(num[0]) && num[0] != '-') || (num[0] == '-' && length == 1)){ // check input data on correct of value
+    if((!isdigit(num[0]) && num[0] != '-') || (num[0] == '-' && length == 1)) // check input data on correct of value
         throw std::runtime_error("Error - wrong symbol in string number");
-    }
 
     for (size_t i = 0; i < length; ++i) {
-        if(!std::isdigit(num[i]) && i != 0){
+        if(!std::isdigit(num[i]) && i != 0)
             throw std::runtime_error("Error - wrong symbol in string number");
-         }
     }
 
     _numberDigits = new unsigned char[0];
@@ -147,12 +144,13 @@ BigInt::BigInt(const std::string& num) {
         shifter = 1;
         _isPositive = false;
     }
-    else{
+    else
         _isPositive = true;
+
+    for (size_t i = 0+shifter; i < length; ++i) {
+        newNumber[i - shifter] = (num[i] - '0');
     }
 
-    for (size_t i = 0+shifter; i < length; ++i)
-        newNumber[i-shifter] = (num[i] - '0');
     length-=shifter;
 
     while (true){ // building number in base 2^32 by division into a column
@@ -237,14 +235,15 @@ BigInt BigInt::operator+() const{
 }
 BigInt BigInt::operator-() const{
     BigInt x(*this);
-    x._isPositive = !x._isPositive;
+    if(*this != BigInt())
+         x._isPositive = !x._isPositive;
     return x;
 }
 BigInt BigInt::operator~() const{
     BigInt x(*this);
     x._isPositive = !x._isPositive;
     for (unsigned int i = 0; i < x._countOfDigits; ++i) {
-        x._numberDigits[i] = ~(x._numberDigits[i]);
+        x._numberDigits[i] = ~this->_numberDigits[i];
     }
     return x;
 }
@@ -353,20 +352,21 @@ BigInt& BigInt::operator-=(const BigInt& num){
 
             this->_numberDigits[i] = static_cast<unsigned char>(tmp); // tmp <= base - 1;
         }else{
-            if(firstNum->_numberDigits[i] == 0 && debt == 1){ // 10000 - 1 there for second digit debt = 1 and digit = 0 => digit became a 9 (10 - 1);
+            if(firstNum->_numberDigits[i] == 0 && debt == 1) // 10000 - 1 there for second digit debt = 1 and digit = 0 => digit became a 9 (10 - 1);
                 this->_numberDigits[i] = base - 1;
-            }
             else if(firstNum->_numberDigits[i] != 0 && debt == 1) { // 19990 - 1 there for second digit debt = 1 and digit = 9 => digit = 8 and debt = 0
                 this->_numberDigits[i] = firstNum->_numberDigits[i] - 1;
                 debt = 0;
-            } else this->_numberDigits[i] = firstNum->_numberDigits[i]; // 19991 - 1 there debt = 0 for 9
+            } else
+                this->_numberDigits[i] = firstNum->_numberDigits[i]; // 19991 - 1 there debt = 0 for 9
         }
     }
 
     unsigned int liveDigit = 0; // 67700 - 67695 = 5. only 1 digit is "live" his position is 0
-    for (unsigned int i = 0; i < maxLen; ++i)
-        if(this->_numberDigits[i] != 0)
+    for (unsigned int i = 0; i < maxLen; ++i) {
+        if (this->_numberDigits[i] != 0)
             liveDigit = i;
+    }
 
     this->_numberDigits = resize(this->_numberDigits, &this->_countOfDigits, liveDigit + 1);
     if(this->_countOfDigits == 1 && this->_numberDigits[0] == 0)
@@ -439,16 +439,20 @@ BigInt& BigInt::operator%=(const BigInt& num){
 }
 BigInt& BigInt::operator&=(const BigInt& num){
     unsigned int minLen = std::min(this->_countOfDigits,num._countOfDigits);
-        for (unsigned int i = 0; i < minLen; ++i)
+        for (unsigned int i = 0; i < minLen; ++i) {
             this->_numberDigits[i] = this->_numberDigits[i] & num._numberDigits[i];
+        }
+
         this->_isPositive = this->_isPositive || num._isPositive;
         this->_numberDigits = resize(this->_numberDigits, &this->_countOfDigits, minLen);
         return *this;
 }
 BigInt& BigInt::operator|=(const BigInt& num) {
     unsigned int minLen = std::min(this->_countOfDigits,num._countOfDigits);
-    for (unsigned int i = 0; i < minLen; ++i)
+    for (unsigned int i = 0; i < minLen; ++i) {
         this->_numberDigits[i] = this->_numberDigits[i] | num._numberDigits[i];
+    }
+
     this->_isPositive = this->_isPositive || num._isPositive;
 
     if(this->_countOfDigits >= num._countOfDigits)
@@ -586,12 +590,15 @@ std::istream& operator>>(std::istream& s, BigInt& i){
     int currChar;
     std::string conStr(" ");
     std::string stringToBigInt("");
+    bool isFirst = true;
     while(true) {
-        //s >> currChar;
         currChar = getchar();
-        if(std::isspace(currChar) || !std::isdigit(currChar))
+        if((std::isspace(currChar) || !std::isdigit(currChar)) && !isFirst)
+            break;
+        if (isFirst && (currChar != '-' && !std::isdigit(currChar)))
             break;
         conStr[0] = currChar;
+        isFirst = false;
         stringToBigInt+=conStr;
     }
 

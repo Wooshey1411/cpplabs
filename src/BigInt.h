@@ -1,14 +1,8 @@
 #pragma once
 #include <iostream>
+#include "Readonly.h"
 
 class BigInt{
-    friend BigInt operator+(const BigInt&, const BigInt&);
-    friend BigInt operator-(const BigInt&, const BigInt&);
-    friend BigInt operator*(const BigInt&, const BigInt&);
-    friend BigInt operator/(const BigInt&, const BigInt&);
-    friend BigInt operator%(const BigInt&, const BigInt&);
-    friend BigInt operator&(const BigInt&, const BigInt&);
-    friend BigInt operator|(const BigInt&, const BigInt&);
 
     friend std::ostream& operator<<(std::ostream& s, const BigInt& i);
     friend std::istream& operator>>(std::istream& s, BigInt& i);
@@ -19,6 +13,7 @@ private:
     unsigned int _countOfDigits;
     bool _isPositive;
     BigInt div (const BigInt& num, char mode);
+
 public:
     unsigned char numberDigits(unsigned int position) {return _numberDigits[position];} // delete in future
     [[nodiscard]] unsigned int countOfDigits() const {return _countOfDigits;} // delete in future
@@ -69,3 +64,10 @@ public:
     ~BigInt();
 };
 
+BigInt operator+(const BigInt&, const BigInt&);
+BigInt operator-(const BigInt&, const BigInt&);
+BigInt operator*(const BigInt&, const BigInt&);
+BigInt operator/(const BigInt&, const BigInt&);
+BigInt operator%(const BigInt&, const BigInt&);
+BigInt operator&(const BigInt&, const BigInt&);
+BigInt operator|(const BigInt&, const BigInt&);

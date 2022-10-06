@@ -134,6 +134,8 @@ namespace {
         EXPECT_TRUE(+uN == BigInt(-123456));
         EXPECT_TRUE(-uP == BigInt(-123456));
         EXPECT_TRUE(-uN == BigInt(123456));
+
+        EXPECT_TRUE(-BigInt() == BigInt());
     }
 
     TEST(AdditionOperatorTest, equalSigns){
