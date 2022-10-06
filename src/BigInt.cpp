@@ -4,6 +4,7 @@
 const unsigned short basicBase = 256;
 const unsigned short decimalBase = 10;
 const unsigned char bytesInInt = sizeof(long);
+
 BigInt abs(const BigInt& num){
     if (num.isPositive())
         return num;
@@ -112,8 +113,8 @@ BigInt::BigInt()
     _numberDigits[0] = 0;
 }
 
-BigInt::BigInt(long num, unsigned short b)
-:_numberDigits(new unsigned char[bytesInInt]),base(Readonly(b)){
+BigInt::BigInt(long num, unsigned short baseS)
+:_numberDigits(new unsigned char[bytesInInt]),base(Readonly(baseS)){
     if(num < 0)
         _isPositive = false;
     else
@@ -247,6 +248,7 @@ BigInt& BigInt::operator=(const BigInt& num){
     }
     return *this;
 }
+
 BigInt& BigInt::operator=(BigInt&& num) noexcept{
     if (this != &num)
     {
@@ -262,15 +264,18 @@ BigInt& BigInt::operator=(BigInt&& num) noexcept{
     return *this;
 }
 
+
 BigInt BigInt::operator+() const{
     return *this;
 }
+
 BigInt BigInt::operator-() const{
     BigInt x(*this);
     if(*this != BigInt())
          x._isPositive = !x._isPositive;
     return x;
 }
+
 BigInt BigInt::operator~() const{
     BigInt x(*this);
     x._isPositive = !x._isPositive;
@@ -280,24 +285,29 @@ BigInt BigInt::operator~() const{
     return x;
 }
 
+
 BigInt& BigInt::operator++(){
     *this += BigInt(1);
     return *this;
 }
+
 BigInt BigInt::operator++(int) {
     BigInt x(*this);
     *this += BigInt(1);
     return x;
 }
+
 BigInt& BigInt::operator--(){
     *this -= BigInt(1);
     return *this;
 }
+
 BigInt BigInt::operator--(int) {
     BigInt x(*this);
     *this -= BigInt(1);
     return x;
 }
+
 
 BigInt& BigInt::operator+=(const BigInt& num){
 
@@ -343,6 +353,7 @@ BigInt& BigInt::operator+=(const BigInt& num){
     }
     return *this;
 }
+
 BigInt& BigInt::operator-=(const BigInt& num){
     if (this->_isPositive && !num._isPositive) // a - (-b) = a + b
         return *this+=-num;
@@ -406,6 +417,7 @@ BigInt& BigInt::operator-=(const BigInt& num){
     return *this;
 
 }
+
 BigInt& BigInt::operator*=(const BigInt& num){
 
     if (num == BigInt() || *this == BigInt()){ // a * 0 or 0 * a = 0
@@ -461,14 +473,17 @@ BigInt& BigInt::operator*=(const BigInt& num){
     return *this;
 
 }
+
 BigInt& BigInt::operator/=(const BigInt& num){
     *this = div(num,'i');
     return *this;
 }
+
 BigInt& BigInt::operator%=(const BigInt& num){
     *this = div(num,'r');
     return *this;
 }
+
 BigInt& BigInt::operator&=(const BigInt& num){
     unsigned int minLen = std::min(this->_countOfDigits,num._countOfDigits);
         for (unsigned int i = 0; i < minLen; ++i) {
@@ -479,6 +494,7 @@ BigInt& BigInt::operator&=(const BigInt& num){
         this->_numberDigits = resize(this->_numberDigits, &this->_countOfDigits, minLen);
         return *this;
 }
+
 BigInt& BigInt::operator|=(const BigInt& num) {
     unsigned int minLen = std::min(this->_countOfDigits,num._countOfDigits);
     for (unsigned int i = 0; i < minLen; ++i) {
@@ -498,38 +514,43 @@ BigInt& BigInt::operator|=(const BigInt& num) {
 }
 
 
-
-
 BigInt operator+(const BigInt& num1, const BigInt& num2){
     BigInt x(num1);
     return x+=num2;
 }
+
 BigInt operator-(const BigInt& num1, const BigInt& num2){
     BigInt x(num1);
     return x-=num2;
 }
+
 BigInt operator*(const BigInt& num1, const BigInt& num2){
     BigInt x(num1);
     return x*=num2;
 }
+
 BigInt operator/(const BigInt& num1, const BigInt& num2){
     BigInt x(num1);
     return x/=num2;
 }
+
 BigInt operator%(const BigInt& num1, const BigInt& num2){
     BigInt x(num1);
     return x%=num2;
 }
+
 BigInt operator&(const BigInt& num1, const BigInt& num2){
     BigInt x(num1);
     x&=num2;
     return x;
 }
+
 BigInt operator|(const BigInt& num1, const BigInt& num2){
     BigInt x(num1);
     x|=num2;
     return x;
 }
+
 
 bool BigInt::operator==(const BigInt& num) const
 {
@@ -541,9 +562,11 @@ bool BigInt::operator==(const BigInt& num) const
     }
     return true;
 }
+
 bool BigInt::operator!=(const BigInt& num) const{
     return !(*this == num);
 }
+
 bool BigInt::operator<(const BigInt& num) const{
     if ((this->_isPositive && !num._isPositive) || this->_countOfDigits > num._countOfDigits || operator==(num))
         return false;
@@ -561,22 +584,26 @@ bool BigInt::operator<(const BigInt& num) const{
 
     return true;
 }
+
 bool BigInt::operator>(const BigInt& num) const{ // > ~ not < and not == because !< = >=
     if(!(*this < num) && *this != num)
         return true;
     return false;
 }
+
 bool BigInt::operator<=(const BigInt& num) const{
     if (!(*this > num))
         return true;
     return false;
 }
+
 bool BigInt::operator>=(const BigInt& num) const
 {
     if(!(*this < num))
         return true;
     return false;
 }
+
 
 BigInt::operator int() const{
     unsigned char pos = 0;
@@ -591,6 +618,7 @@ BigInt::operator int() const{
         return -res;
     return res;
 }
+
 BigInt::operator std::string() const{
     BigInt str(0,decimalBase);
     BigInt baseStr(this->base.getInstance(),decimalBase);
@@ -611,13 +639,16 @@ BigInt::operator std::string() const{
 
     return ans;
 }
+
 size_t BigInt::size() const{
     return sizeof(BigInt) + this->_countOfDigits;
 }
+
 std::ostream& operator<<(std::ostream& s, const BigInt& i){
     s << std::string(i);
     return s;
 }
+
 std::istream& operator>>(std::istream& s, BigInt& i){
     int currChar;
     std::string conStr(" ");

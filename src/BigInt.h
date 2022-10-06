@@ -3,11 +3,9 @@
 #include "Readonly.h"
 
 class BigInt{
-
-    friend BigInt pow(BigInt& num,unsigned int deg, unsigned short base); // pow for BigInt with base = 10
-
+    friend BigInt pow(BigInt& num,unsigned int deg, unsigned short base);
 private:
-    BigInt(long,unsigned short);
+    BigInt(long num,unsigned short base); // constructor for internal methods.
     unsigned char* _numberDigits;
     unsigned int _countOfDigits;
     bool _isPositive;
@@ -46,8 +44,6 @@ public:
     BigInt& operator|=(const BigInt&);
 
 
-
-    // bool operations
     bool operator==(const BigInt&) const;
     bool operator!=(const BigInt&) const;
     bool operator<(const BigInt&) const;
