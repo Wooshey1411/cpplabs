@@ -537,7 +537,7 @@ namespace {
 
         BigInt bP("123456789123456789");
         int bp = int(bP);
-        EXPECT_TRUE(bp == -1395630315);
+        EXPECT_TRUE(bp == 1395630315);
 
         BigInt bN("-123456789123456789");
         int bn = int(bN);

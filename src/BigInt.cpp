@@ -12,6 +12,8 @@ BigInt abs(const BigInt& num){
 }
 
 unsigned char* resize(unsigned char* a, unsigned int *size, unsigned int newSize){
+    if(newSize == *size)
+        return a;
     auto* t = new unsigned char[newSize+1];
     std::copy(a, a + newSize, t);
     (*size) = newSize;
@@ -278,10 +280,24 @@ BigInt BigInt::operator-() const{
 
 BigInt BigInt::operator~() const{
     BigInt x(*this);
-    x._isPositive = !x._isPositive;
+
+
     for (unsigned int i = 0; i < x._countOfDigits; ++i) {
-        x._numberDigits[i] = ~this->_numberDigits[i];
+        for (int j = 0; j < 8; ++j) {
+            if(static_cast<bool>((1 << j) & x._numberDigits[i]))
+                x._numberDigits[i] &= ~(1 << j);
+            else
+                x._numberDigits[i] |= (1 << j);
+        }
     }
+
+    for (unsigned int i = 0; i < x._countOfDigits; ++i) {
+        x._numberDigits[i] = 255 - (x._numberDigits[i]);
+    }
+    x+=BigInt(1);
+    x._isPositive = !x._isPositive;
+    if(x._numberDigits[x._countOfDigits-1] == 0)
+        x._numberDigits = resize(x._numberDigits,&x._countOfDigits,x._countOfDigits-1);
     return x;
 }
 
@@ -485,13 +501,21 @@ BigInt& BigInt::operator%=(const BigInt& num){
 }
 
 BigInt& BigInt::operator&=(const BigInt& num){
-    unsigned int minLen = std::min(this->_countOfDigits,num._countOfDigits);
+    BigInt n1;
+    BigInt n2;
+
+    n1 = *this;
+    n2 = num;
+
+    unsigned int minLen = std::min(n1._countOfDigits,n2._countOfDigits);
         for (unsigned int i = 0; i < minLen; ++i) {
-            this->_numberDigits[i] = this->_numberDigits[i] & num._numberDigits[i];
+            this->_numberDigits[i] = n1._numberDigits[i] & n2._numberDigits[i];
         }
+
 
         this->_isPositive = this->_isPositive || num._isPositive;
         this->_numberDigits = resize(this->_numberDigits, &this->_countOfDigits, minLen);
+
         return *this;
 }
 
@@ -513,6 +537,29 @@ BigInt& BigInt::operator|=(const BigInt& num) {
     return *this;
 }
 
+BigInt& BigInt::operator^=(const BigInt& num){
+    unsigned int minLen = std::min(this->_countOfDigits,num._countOfDigits);
+    for (unsigned int i = 0; i < minLen; ++i) {
+        this->_numberDigits[i] = this->_numberDigits[i] ^ num._numberDigits[i];
+    }
+
+    unsigned int maxLen = std::max(this->_countOfDigits,num._countOfDigits);
+    this->_numberDigits = resize(this->_numberDigits,&this->_countOfDigits,maxLen);
+    const BigInt* moreNum;
+    if (this->_countOfDigits >= num._countOfDigits)
+        moreNum = this;
+    else
+        moreNum = &num;
+    for (unsigned int i = minLen; i < maxLen; ++i) {
+        this->_numberDigits[i] = moreNum->_numberDigits[i] ^ 0;
+    }
+    if(*this == BigInt()) {
+        this->_isPositive = true;
+        return *this;
+    }
+    this->_isPositive = !(this->_isPositive ^ num._isPositive);
+    return *this;
+}
 
 BigInt operator+(const BigInt& num1, const BigInt& num2){
     BigInt x(num1);
@@ -551,6 +598,11 @@ BigInt operator|(const BigInt& num1, const BigInt& num2){
     return x;
 }
 
+BigInt operator^(const BigInt& num1, const BigInt& num2){
+    BigInt x(num1);
+    x^=num2;
+    return x;
+}
 
 bool BigInt::operator==(const BigInt& num) const
 {
@@ -611,11 +663,21 @@ BigInt::operator int() const{
     while(true){
         res+= this->_numberDigits[pos]*pow(base.getInstance(),pos);
         pos++;
-        if(pos == 4 || pos == this->_countOfDigits)
+        if(pos == bytesInInt || pos == this->_countOfDigits)
             break;
     }
-    if(!this->_isPositive)
-        return -res;
+
+    if(this->countOfDigits() <= bytesInInt){
+        if(this->_isPositive)
+            return res;
+        else
+            return -res;
+    }
+
+    if((res & ( 1 << (sizeof(int)*8-1))) != 0){ // case when last bit = 1;
+        res -= 1;
+        res=~res;
+    }
     return res;
 }
 

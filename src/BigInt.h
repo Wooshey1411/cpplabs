@@ -12,8 +12,8 @@ private:
     BigInt div (const BigInt& num, char mode);
     Readonly base;
 public:
-    unsigned char numberDigits(unsigned int position) {return _numberDigits[position];} // delete in future
-    [[nodiscard]] unsigned int countOfDigits() const {return _countOfDigits;} // delete in future
+    unsigned char numberDigits(unsigned int position) {return _numberDigits[position];}
+    [[nodiscard]] unsigned int countOfDigits() const {return _countOfDigits;}
     [[nodiscard]] bool isPositive() const {return _isPositive;}
     // constructors
     BigInt();
@@ -42,6 +42,7 @@ public:
     BigInt& operator%=(const BigInt&);
     BigInt& operator&=(const BigInt&);
     BigInt& operator|=(const BigInt&);
+    BigInt& operator^=(const BigInt&);
 
 
     bool operator==(const BigInt&) const;
@@ -66,5 +67,6 @@ BigInt operator/(const BigInt&, const BigInt&);
 BigInt operator%(const BigInt&, const BigInt&);
 BigInt operator&(const BigInt&, const BigInt&);
 BigInt operator|(const BigInt&, const BigInt&);
+BigInt operator^(const BigInt&, const BigInt&);
 std::ostream& operator<<(std::ostream& s, const BigInt& i);
 std::istream& operator>>(std::istream& s, BigInt& i);
