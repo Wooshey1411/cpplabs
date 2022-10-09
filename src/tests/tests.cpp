@@ -561,5 +561,54 @@ namespace {
         EXPECT_TRUE(std::string(bN) == "-1234567898765432112345678909876543210");
     }
 
+    TEST(LogicalOperatorsTest,ComplementOperator){
+        BigInt a(123);
+        a = ~a;
+        EXPECT_TRUE(a == BigInt(-124));
+
+        BigInt aN(-123);
+        aN = ~aN;
+        EXPECT_TRUE(aN == BigInt(122));
+
+        BigInt ab(123456789);
+        ab = ~ab;
+        EXPECT_TRUE(ab == BigInt(-123456790));
+    }
+
+    TEST(LogicalOperatorsTest,ConjunctionOperator){
+        BigInt a(123);
+        a &= BigInt(13);
+        EXPECT_TRUE(a == BigInt(9));
+        EXPECT_TRUE((BigInt(123) & BigInt(13)) == BigInt(9));
+
+        BigInt aB(123456789);
+        aB &= BigInt(111);
+        EXPECT_TRUE(aB == BigInt(5));
+        EXPECT_TRUE((BigInt(123456789) & BigInt(111)) == BigInt(5));
+    }
+
+    TEST(LogicalOperatorsTest,DisjunctionOperator){
+        BigInt a(123);
+        a |= BigInt(13);
+        EXPECT_TRUE(a == BigInt(127));
+        EXPECT_TRUE((BigInt(123) | BigInt(13)) == BigInt(127));
+
+        BigInt aB(123456789);
+        aB |= BigInt(111);
+        EXPECT_TRUE(aB == BigInt(123456895));
+        EXPECT_TRUE((BigInt(123456789) | BigInt(111)) == BigInt(123456895));
+    }
+
+    TEST(LogicalOperatorsTest,XOROperator){
+        BigInt a(123);
+        a ^= BigInt(13);
+        EXPECT_TRUE(a == BigInt(118));
+        EXPECT_TRUE((BigInt(123) ^ BigInt(13)) == BigInt(118));
+
+        BigInt aB(123456789);
+        aB ^= BigInt(111);
+        EXPECT_TRUE(aB == BigInt(123456890));
+        EXPECT_TRUE((BigInt(123456789) ^ BigInt(111)) == BigInt(123456890));
+    }
 
 }
