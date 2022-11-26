@@ -1,0 +1,103 @@
+#include "WAVReader.h"
+
+WAVReader::WAVReader(std::string_view path):_path(path){
+    _reader = fopen(_path.c_str(),"r");
+}
+
+void WAVReader::readHeader() {
+    fread(&_wavHeader.headerMain,sizeof(_wavHeader.headerMain),1,_reader);
+
+    if(_wavHeader.headerMain.RIFF[0] != 'R' ||_wavHeader.headerMain.RIFF[1] != 'I'
+    || _wavHeader.headerMain.RIFF[2] != 'F' || _wavHeader.headerMain.RIFF[3] != 'F'){
+        throw std::runtime_error("header corrupted");
+    }
+
+    char checker;
+    long pos = ftell(_reader);
+
+    fread(&checker,1,1,_reader);
+    fseek(_reader,pos,0);
+    if(checker != 'L' && checker != 'd')
+        throw std::runtime_error("header corrupted");
+
+    if(checker == 'L'){
+
+        fread(&_wavHeader.listHeader.LIST,align,1,_reader);
+        if(_wavHeader.listHeader.LIST[0] != 'L' || _wavHeader.listHeader.LIST[1] != 'I'
+        || _wavHeader.listHeader.LIST[2] != 'S' || _wavHeader.listHeader.LIST[3] != 'T'){
+            throw std::runtime_error("header corrupted");
+        }
+        fread(&_wavHeader.listHeader.listSize,sizeof(uint32_t),1,_reader);
+        _wavHeader.listExist = true;
+        _wavHeader.listHeader.list = new unsigned char[_wavHeader.listHeader.listSize+1];
+        fread(&_wavHeader.listHeader.list[0],_wavHeader.listHeader.listSize,1,_reader);
+    }else{
+        _wavHeader.listExist = false;
+    }
+
+    fread(&_wavHeader.DATA,align,1,_reader);
+    if(_wavHeader.DATA[0] != 'd' || _wavHeader.DATA[1] != 'a'
+       || _wavHeader.DATA[2] != 't' || _wavHeader.DATA[3] != 'a'){
+        throw std::runtime_error("header corrupted");
+    }
+    fread(&_wavHeader.subChunk2Size,sizeof(uint32_t),1,_reader);
+
+
+
+}
+
+void WAVReader::printHeader() {
+    std::cout << "RIFF header                :" << _wavHeader.headerMain.RIFF[0]
+              << _wavHeader.headerMain.RIFF[1]
+              << _wavHeader.headerMain.RIFF[2]
+              << _wavHeader.headerMain.RIFF[3] << "\n";
+
+    std::cout << "WAVE header                :" << _wavHeader.headerMain.WAVE[0]
+              << _wavHeader.headerMain.WAVE[1]
+              << _wavHeader.headerMain.WAVE[2]
+              << _wavHeader.headerMain.WAVE[3]
+              << "\n";
+
+    std::cout << "FMT                        :" << _wavHeader.headerMain.fmt[0]
+              << _wavHeader.headerMain.fmt[1]
+              << _wavHeader.headerMain.fmt[2]
+              << _wavHeader.headerMain.fmt[3]
+              << "\n";
+
+    std::cout << "Data(chunk) size           :" <<_wavHeader.headerMain.chunkSize << "\n";
+
+    // Display the sampling Rate form the header
+    std::cout << "Sampling Rate              :" << _wavHeader.headerMain.samplesPerSec << "\n";
+    std::cout << "Number of bits used        :" << _wavHeader.headerMain.bitsPerSample << "\n";
+    std::cout << "Number of channels         :" << _wavHeader.headerMain.countOfChannels << "\n";
+    std::cout << "Number of bytes per second :" << _wavHeader.headerMain.bytesPerSec << "\n";
+    std::cout << "subchunk size              :" << _wavHeader.headerMain.subChunk1Size << "\n";
+    std::cout << "Data length                :" << _wavHeader.subChunk2Size << "\n";
+    std::cout << "Audio Format               :" << _wavHeader.headerMain.audioFormat << "\n";
+
+    std::cout << "Block align                :" << _wavHeader.headerMain.blockAlign << "\n";
+
+    if(_wavHeader.listExist) {
+        std::cout << "LIST header                :" << _wavHeader.listHeader.LIST[0]
+                  << _wavHeader.listHeader.LIST[1]
+                  << _wavHeader.listHeader.LIST[2]
+                  << _wavHeader.listHeader.LIST[3] << "\n";
+        std::cout << "list count                 :" << _wavHeader.listHeader.listSize << "\n";
+        std::cout << "list                       :" << "\n";
+        for (int i = 0; i < _wavHeader.listHeader.listSize; ++i) {
+            std::cout << _wavHeader.listHeader.list[i];
+        }
+        std::cout << std::endl;
+    }
+
+}
+
+const Header *WAVReader::getHeader() {
+    return &_wavHeader;
+}
+
+WAVReader::~WAVReader() {
+    if(_wavHeader.listExist)
+        delete[] _wavHeader.listHeader.list;
+}
+

@@ -3,4 +3,4 @@ project(SoundProcessor)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(SoundProcessor main.cpp)
+add_executable(SoundProcessor src/main.cpp src/WAVReader.cpp src/WAVWriter.cpp)
