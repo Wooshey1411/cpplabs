@@ -9,7 +9,7 @@ public:
     WAVWriter(std::string_view);
     void writeHeader(const Header*);
     void writeSecond(BufferPipeline*);
-    ~WAVWriter() = default;
+    ~WAVWriter();
 
 private:
     std::string _path;

@@ -136,5 +136,6 @@ bool WAVReader::readFullBuffer(BufferPipeline* bufferPipeline) {
 WAVReader::~WAVReader() {
     if(_wavHeader.listExist)
         delete[] _wavHeader.listHeader.list;
+    fclose(_reader);
 }
 

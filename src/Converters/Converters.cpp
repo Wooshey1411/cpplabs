@@ -69,6 +69,15 @@ void BassBoostedConverter::convert(void *params, BufferPipeline *buffer) {
 
 DistortionConverter::DistortionConverter():_isFinished(true),_extremumPos(0),_maxV(0) {}
 
+bool sign (int num){
+    if (num >= 0) {
+        return true;
+    }
+    else{
+        return false;
+    }
+}
+
 void DistortionConverter::convert(void* params, BufferPipeline* buffer) {
     auto* ifcParams = static_cast<IFCParams*>(params);
     if(buffer->currSec >= ifcParams->initial && buffer->currSec <= ifcParams->final){
@@ -86,7 +95,8 @@ void DistortionConverter::convert(void* params, BufferPipeline* buffer) {
                     bool rightDone = false;
                     while(true){
                         _isFinished = false;
-                        if(inPos > 1 && abs(buffer->buffer[inPos-1]) > _maxV && !leftDone && abs(buffer->buffer[inPos-1]) > abs(buffer->buffer[inPos-2])) {
+                        if(inPos > 1 && abs(buffer->buffer[inPos-1]) > _maxV && !leftDone && abs(buffer->buffer[inPos-1]) > abs(buffer->buffer[inPos-2])
+                        && sign(buffer->buffer[inPos]) == sign(buffer->buffer[inPos-1])) {
 
                             if(buffer->buffer[inPos-1] < 0) {
                                 buffer->buffer[inPos - 1] = static_cast<short>(-_maxV);
@@ -98,7 +108,8 @@ void DistortionConverter::convert(void* params, BufferPipeline* buffer) {
                             leftDone = true;
                         }
 
-                        if(fiPos < lengthOfBuffer-1 && fiPos < (buffer->pos+buffer->frequency) && abs(buffer->buffer[fiPos+1]) >= _maxV && !rightDone && abs(buffer->buffer[fiPos+1]) > abs(buffer->buffer[fiPos+2])){
+                        if(fiPos < lengthOfBuffer-1 && fiPos < (buffer->pos+buffer->frequency) && abs(buffer->buffer[fiPos+1]) >= _maxV && !rightDone
+                        && abs(buffer->buffer[fiPos+1]) > abs(buffer->buffer[fiPos+2]) && sign(buffer->buffer[fiPos]) == sign(buffer->buffer[fiPos+1])){
                             if(buffer->buffer[fiPos+1] < 0) {
                                 buffer->buffer[fiPos + 1] = static_cast<short>(-_maxV);
                             }
