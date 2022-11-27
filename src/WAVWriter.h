@@ -1,12 +1,14 @@
 #pragma once
 #include "header.h"
+#include "BufferPipeline.h"
 #include <iostream>
 
 
 class WAVWriter {
 public:
-    void writeHeader(const Header*);
     WAVWriter(std::string_view);
+    void writeHeader(const Header*);
+    void writeSecond(BufferPipeline*);
     ~WAVWriter() = default;
 
 private:

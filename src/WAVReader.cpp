@@ -1,7 +1,7 @@
 #include "WAVReader.h"
 
 WAVReader::WAVReader(std::string_view path):_path(path){
-    _reader = fopen(_path.c_str(),"r");
+    _reader = fopen(_path.c_str(),"rb");
 }
 
 void WAVReader::readHeader() {
@@ -94,6 +94,43 @@ void WAVReader::printHeader() {
 
 const Header *WAVReader::getHeader() {
     return &_wavHeader;
+}
+
+bool WAVReader::readSecond(BufferPipeline* bufferPipeline) {
+
+    if(bufferPipeline->frequency == 0){
+        bufferPipeline->frequency = _wavHeader.headerMain.samplesPerSec;
+    }else{
+        bufferPipeline->currSec++;
+    }
+
+    if(feof(_reader)){
+        return false;
+    }
+    if(bufferPipeline->pos+bufferPipeline->frequency >= lengthOfBuffer){
+        bufferPipeline->pos = 0;
+    }
+    unsigned int readed = fread(&(bufferPipeline->buffer[bufferPipeline->pos]),2,bufferPipeline->frequency,_reader);
+    if(feof(_reader)){
+        bufferPipeline->endPos = bufferPipeline->pos + readed;
+    }
+    return true;
+}
+
+bool WAVReader::readFullBuffer(BufferPipeline* bufferPipeline) {
+    if(bufferPipeline->frequency == 0) {
+        bufferPipeline->frequency = _wavHeader.headerMain.samplesPerSec;
+    }
+
+    if(feof(_reader)){
+        return false;
+    }
+    unsigned int readed;
+    readed = fread(&(bufferPipeline->buffer[bufferPipeline->pos]),2,lengthOfBuffer-bufferPipeline->pos,_reader);
+    if (readed != lengthOfBuffer-bufferPipeline->pos){
+        bufferPipeline->endPos = bufferPipeline->pos + readed;
+    }
+    return true;
 }
 
 WAVReader::~WAVReader() {

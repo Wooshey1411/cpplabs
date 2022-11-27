@@ -3,6 +3,7 @@
 #include <string>
 #include <memory>
 #include "header.h"
+#include "BufferPipeline.h"
 
 class WAVReader{
 public:
@@ -10,6 +11,8 @@ public:
     void readHeader();
     void printHeader();
     const Header* getHeader();
+    bool readSecond(BufferPipeline*);
+    bool readFullBuffer(BufferPipeline*);
     ~WAVReader();
 private:
     std::string _path;
