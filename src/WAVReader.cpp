@@ -107,7 +107,7 @@ bool WAVReader::readSecond(BufferPipeline* bufferPipeline) {
     if(feof(_reader)){
         return false;
     }
-    if(bufferPipeline->pos+bufferPipeline->frequency >= lengthOfBuffer){
+    if(bufferPipeline->pos+bufferPipeline->frequency >= LENGTH_OF_BUFFER){
         bufferPipeline->pos = 0;
     }
     unsigned int readed = fread(&(bufferPipeline->buffer[bufferPipeline->pos]),2,bufferPipeline->frequency,_reader);
@@ -126,8 +126,8 @@ bool WAVReader::readFullBuffer(BufferPipeline* bufferPipeline) {
         return false;
     }
     unsigned int readed;
-    readed = fread(&(bufferPipeline->buffer[bufferPipeline->pos]),2,lengthOfBuffer-bufferPipeline->pos,_reader);
-    if (readed != lengthOfBuffer-bufferPipeline->pos){
+    readed = fread(&(bufferPipeline->buffer[bufferPipeline->pos]),2,LENGTH_OF_BUFFER-bufferPipeline->pos,_reader);
+    if (readed != LENGTH_OF_BUFFER-bufferPipeline->pos){
         bufferPipeline->endPos = bufferPipeline->pos + readed;
     }
     return true;

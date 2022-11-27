@@ -4,55 +4,101 @@
 #include "Processor.h"
 #include "Params.h"
 #include <vector>
+#include <cstring>
+#include "ConfigParser.h"
 
-int main() {
-    Processor processor;
-    PIParams piParams = {"C:\\aboba\\lesnik.wav",0};
-    IFParams ifParams = {0,60};
-    IFCParams  ifcParams = {0,100,40};
+void printHelp(){
+    std::cout << "NAME\n";
+    std::cout << "          SoundProcessor - utility for transformations on wav files\n";
 
-    std::vector<std::string> converters;
-    std::vector<void*> params;
-    params.push_back(&piParams);
-    params.push_back(&ifcParams);
-    params.push_back(&ifParams);
-    converters.push_back("mix");
-    converters.push_back("distortion");
-    converters.push_back("mute");
+    std::cout << "SYNOPSIS\n";
+    std::cout << "          SoundProcessor [-c config.txt output.wav input1.wav [input2.wav ...]]\n";
+    std::cout << "DESCRIPTION\n";
+    std::cout << "          Information of convertion on input1.wav stores in config.txt\n";
+    std::cout << "          Converted file write in output.wav\n";
+    std::cout << "          input2.wav ... need for some converters\n";
+    std::cout << "          Every string in config.txt includes name of conversion and params\n";
+    std::cout << "          In config.txt allows comment-string. They start with symbol '#'\n";
+    std::cout << "CONVERTERS\n";
+    std::cout << "          mute [INITIAL_SECOND] [FINAL_SECOND]\n";
+    std::cout << "               mute audio from INITIAL_SECOND to FINAL_SECOND\n\n";
+    std::cout << "          mix [#NUMBER] [INITIAL_SECOND]\n";
+    std::cout << "               mix input audio file with another by NUMBER in order of indication in arguments\n";
+    std::cout << "               from INITIAL_SECOND to end of file\n\n";
+    std::cout << "          bassBoosted [INITIAL_SECOND] [FINAL_SECOND]\n";
+    std::cout << "               make bass boosted effect from INITIAL_SECOND to FINAL_SECOND\n\n";
+    std::cout << "          distortion [INITIAL_SECOND] [FINAL_SECOND] [COEFFICIENT]\n";
+    std::cout << "               make distortion effect from INITIAL_SECOND to FINAL_SECOND\n";
+    std::cout << "               COEFFICIENT - level of cutting of wave in percents\n";
+}
 
-    bool permutator = false;
-    std::string outStr = "C:\\aboba\\out.wav";
-    std::string inStr = "C:\\aboba\\myaso.wav";
-    unsigned int pos = 0;
-    bool permutated = false;
-    for(auto it = converters.begin(); it != converters.end(); it++)
-    {
-        if(pos == converters.size() - 1){
-            if(!permutated){
-                processor.convert(inStr,outStr,*it,params[pos]);
-            } else {
-                processor.convert(permutator ? "tmp2" : "tmp1", outStr, *it, params[pos]);
-            }
-            break;
-        } else{
+int main(int argc, char* argv[]) {
+    if(!strcmp(argv[1],"-h") && argc == 2){
+        printHelp();
+        return 0;
+    }
 
-            if(!permutated){
-                processor.convert(inStr,"tmp1",*it,params[pos]);
-                permutated = true;
-            } else{
-                processor.convert(permutator ? "tmp2" : "tmp1", permutator ? "tmp1" : "tmp2",*it,params[pos]);
-                permutator = !permutator;
-            }
+    if(argc > 2 && !strcmp(argv[1],"-c")){
+        std::vector<std::string> files;
+        for (int i = 2; i < argc; ++i) {
+            files.push_back(std::string(argv[i]));
         }
-        pos++;
+        std::vector<std::string> converters;
+        std::vector<void*> params;
+        ConfigParser configParser;
+        configParser.parse(files,params,converters);
+
+        Processor processor;
+        bool permutator = false;
+
+        unsigned int pos = 0;
+        bool permutated = false;
+        for(auto it = converters.begin(); it != converters.end(); it++)
+        {
+            if(pos == converters.size() - 1){
+                if(!permutated){
+                    processor.convert(files[2],files[1],*it,params[pos]);
+                } else {
+                    processor.convert(permutator ? "tmp2" : "tmp1", files[1], *it, params[pos]);
+                }
+                break;
+            } else{
+
+                if(!permutated){
+                    processor.convert(files[2],"tmp1",*it,params[pos]);
+                    permutated = true;
+                } else{
+                    processor.convert(permutator ? "tmp2" : "tmp1", permutator ? "tmp1" : "tmp2",*it,params[pos]);
+                    permutator = !permutator;
+                }
+            }
+            pos++;
+        }
+        if(converters.size() == 2){
+            remove("tmp1");
+        }
+        if(converters.size() >=3){
+            remove("tmp1");
+            remove("tmp2");
+        }
+
+        pos = 0;
+
+
+        for (auto & param : params) {
+            if(converters[pos] == "mute"
+            || converters[pos] == "bassBoosted"){
+                delete static_cast<IFParams*>(param);
+            } else if(converters[pos] == "mix"){
+                delete static_cast<PIParams*>(param);
+            } else if(converters[pos] == "distortion"){
+                delete static_cast<IFCParams*>(param);
+            }
+            pos++;
+        }
+
+
     }
-    if(converters.size() == 2){
-        remove("tmp1");
-    }
-    if(converters.size() >=3){
-        remove("tmp1");
-        remove("tmp2");
-    }
-   // processor.convert("C:\\aboba\\moca.wav","C:\\aboba\\out.wav","distortion",&ifcParams);
+
     return 0;
 }

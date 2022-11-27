@@ -34,7 +34,7 @@ void MixConverter::convert(void *params, BufferPipeline *buffer) {
                 _isFinished = true;
                 break;
             }
-            if(_bufferPipeline.pos+i == lengthOfBuffer){
+            if(_bufferPipeline.pos+i == LENGTH_OF_BUFFER){
                 isOverflow = true;
                 _bufferPipeline.pos = 0;
                 _reader->readFullBuffer(&_bufferPipeline);
@@ -108,7 +108,7 @@ void DistortionConverter::convert(void* params, BufferPipeline* buffer) {
                             leftDone = true;
                         }
 
-                        if(fiPos < lengthOfBuffer-1 && fiPos < (buffer->pos+buffer->frequency) && abs(buffer->buffer[fiPos+1]) >= _maxV && !rightDone
+                        if(fiPos < LENGTH_OF_BUFFER-1 && fiPos < (buffer->pos+buffer->frequency) && abs(buffer->buffer[fiPos+1]) >= _maxV && !rightDone
                         && abs(buffer->buffer[fiPos+1]) > abs(buffer->buffer[fiPos+2]) && sign(buffer->buffer[fiPos]) == sign(buffer->buffer[fiPos+1])){
                             if(buffer->buffer[fiPos+1] < 0) {
                                 buffer->buffer[fiPos + 1] = static_cast<short>(-_maxV);

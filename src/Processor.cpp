@@ -9,7 +9,6 @@ void Processor::convert(std::string_view in, std::string_view out, std::string_v
     WAVReader reader(in);
     WAVWriter writer(out);
     reader.readHeader();
-    reader.printHeader();
     writer.writeHeader(reader.getHeader());
     BufferPipeline buff;
     ConvertersFactory factory;
@@ -18,8 +17,6 @@ void Processor::convert(std::string_view in, std::string_view out, std::string_v
     while (reader.readSecond(&buff)){
         converter->convert(params,&buff);
         writer.writeSecond(&buff);
-        //if(counter == 10)
-       //     break;
         counter++;
     }
 

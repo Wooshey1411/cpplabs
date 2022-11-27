@@ -3,4 +3,6 @@ project(SoundProcessor)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(SoundProcessor src/main.cpp src/WAVReader.cpp src/WAVWriter.cpp src/BufferPipeline.cpp src/Processor.cpp  src/Converters/ConvertersFactory.cpp src/Converters/Converters.h src/Converters/Converters.cpp src/Params.h)
+add_executable(SoundProcessor src/main.cpp src/WAVReader.cpp src/WAVWriter.cpp src/BufferPipeline.cpp src/Processor.cpp  src/Converters/ConvertersFactory.cpp src/Converters/Converters.h src/Converters/Converters.cpp src/Params.h src/ConfigParser.cpp src/ConfigParser.h)
+
+set(CMAKE_EXE_LINKER_FLAGS "-static")

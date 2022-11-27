@@ -1,6 +1,6 @@
 #pragma once
 
-inline const int lengthOfBuffer = 44100*60; // 44100 - average frequency, 4 - sizeof(int), 60 - seconds in minute
+inline const int LENGTH_OF_BUFFER = 44100*60*4; // 44100 - average frequency, 4 - sizeof(int), 60 - seconds in minute
 
 class BufferPipeline{
 public:
