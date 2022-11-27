@@ -51,9 +51,13 @@ int main(int argc, char* argv[]) {
         ConfigParser configParser;
         try {
             configParser.parse(files, params, converters);
-        } catch(...) {
-            std::cerr << "config corrupted\n";
+        } catch(BadConfigException& e) {
+            std::cerr << e.what() << "\n";
             return BAD_CONFIG;
+        }
+        catch(NoConfigException& e){
+            std::cerr << e.what() << "\n";
+            return NO_CONFIG_FILE;
         }
 
         Processor processor;
@@ -85,13 +89,12 @@ int main(int argc, char* argv[]) {
         }
         catch (NoFileException& e){
             std::cerr << e.what();
-            return NO_FILE;
+            return NO_INPUT_FILE;
         }
         catch (BadHeaderException& e){
             std::cerr << e.what();
             return BAD_HEADER;
         }
-
 
         if(converters.size() == 2){
             remove("tmp1");

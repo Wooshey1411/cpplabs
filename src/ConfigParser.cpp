@@ -2,13 +2,14 @@
 #include <fstream>
 #include "Params.h"
 #include <iostream>
+#include "Exceptions.h"
 
 unsigned int getValue(const std::string& str, bool skip){
     unsigned int value = 0;
     for (unsigned int i = 0; i < str.size(); i++) {
         if (!(skip && i == 0)){
             if (!std::isdigit(str[i])) {
-                throw std::runtime_error("config corrupted");
+                throw BadConfigException();
             }
             value = value * 10 + (str[i] - '0');
         }
@@ -44,7 +45,7 @@ bool ConfigParser::parseString(std::vector<std::string> &files, std::vector<void
         auto* piParams= new PIParams;
         unsigned int pos = getValue(strI,true);
         if (pos >= files.size()){
-            throw std::runtime_error("config corrupted");
+            throw BadConfigException();
         }
         piParams->path = files[2+pos]; // 2 - position of first additional file
         in >> strI;
@@ -65,7 +66,7 @@ bool ConfigParser::parseString(std::vector<std::string> &files, std::vector<void
         _params.push_back(ifcParams);
         converters.push_back(str);
     } else{
-        throw std::runtime_error("config corrupted");
+        throw BadConfigException();
     }
 
     _converters.push_back(str);
@@ -79,6 +80,9 @@ bool ConfigParser::parseString(std::vector<std::string> &files, std::vector<void
 void ConfigParser::parse(std::vector<std::string> &files, std::vector<void *> &params, std::vector<std::string> &converters) {
     std::ifstream in;
     in.open(files[0]);
+    if(!in.is_open()){
+        throw NoConfigException();
+    }
 
     while(true) {
         bool checker = parseString(files,params,converters,in);

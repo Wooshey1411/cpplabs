@@ -20,3 +20,23 @@ std::string NoFileException::what() {
 std::string BadHeaderException::what() {
     return text;
 }
+
+ConfigException::ConfigException() {
+    text = "Error. File corrupted";
+}
+
+ConfigException::ConfigException(std::string message) {
+    text = std::move(message);
+}
+
+std::string ConfigException::what() {
+    return text;
+}
+
+std::string NoConfigException::what() {
+    return text;
+}
+
+std::string BadConfigException::what() {
+    return text;
+}
