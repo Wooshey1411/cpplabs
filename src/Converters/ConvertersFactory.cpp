@@ -9,6 +9,7 @@ std::shared_ptr<Converter> createCnv(){
 ConvertersFactory::ConvertersFactory() {
     _converters["mute"] = createCnv<MuteConverter>;
     _converters["mix"] = createCnv<MixConverter>;
+    _converters["bassBoosted"] = createCnv<BassBoostedConverter>;
     _converters["distortion"] = createCnv<DistortionConverter>;
 }
 

@@ -20,6 +20,12 @@ private:
     bool _isFinished;
 };
 
+class BassBoostedConverter : public Converter{
+public:
+    void convert(void* params, BufferPipeline* buffer) override;
+    ~BassBoostedConverter() override = default;
+};
+
 class DistortionConverter : public Converter{
 public:
     void convert(void* params, BufferPipeline* buffer) override;
