@@ -2,14 +2,18 @@
 
 WAVReader::WAVReader(std::string_view path):_path(path){
     _reader = fopen(_path.c_str(),"rb");
+    _wavHeader.listExist = false;
 }
 
 void WAVReader::readHeader() {
+    if(!_reader){
+        throw NoFileException();
+    }
     fread(&_wavHeader.headerMain,sizeof(_wavHeader.headerMain),1,_reader);
 
     if(_wavHeader.headerMain.RIFF[0] != 'R' ||_wavHeader.headerMain.RIFF[1] != 'I'
     || _wavHeader.headerMain.RIFF[2] != 'F' || _wavHeader.headerMain.RIFF[3] != 'F'){
-        throw std::runtime_error("header corrupted");
+        throw BadHeaderException();
     }
 
     char checker;
@@ -18,14 +22,14 @@ void WAVReader::readHeader() {
     fread(&checker,1,1,_reader);
     fseek(_reader,pos,0);
     if(checker != 'L' && checker != 'd')
-        throw std::runtime_error("header corrupted");
+        throw BadHeaderException();
 
     if(checker == 'L'){
 
         fread(&_wavHeader.listHeader.LIST,align,1,_reader);
         if(_wavHeader.listHeader.LIST[0] != 'L' || _wavHeader.listHeader.LIST[1] != 'I'
         || _wavHeader.listHeader.LIST[2] != 'S' || _wavHeader.listHeader.LIST[3] != 'T'){
-            throw std::runtime_error("header corrupted");
+            throw BadHeaderException();
         }
         fread(&_wavHeader.listHeader.listSize,sizeof(uint32_t),1,_reader);
         _wavHeader.listExist = true;
@@ -38,7 +42,7 @@ void WAVReader::readHeader() {
     fread(&_wavHeader.DATA,align,1,_reader);
     if(_wavHeader.DATA[0] != 'd' || _wavHeader.DATA[1] != 'a'
        || _wavHeader.DATA[2] != 't' || _wavHeader.DATA[3] != 'a'){
-        throw std::runtime_error("header corrupted");
+        throw BadHeaderException();
     }
     fread(&_wavHeader.subChunk2Size,sizeof(uint32_t),1,_reader);
 

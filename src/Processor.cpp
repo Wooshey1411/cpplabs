@@ -19,6 +19,4 @@ void Processor::convert(std::string_view in, std::string_view out, std::string_v
         writer.writeSecond(&buff);
         counter++;
     }
-
-
 }

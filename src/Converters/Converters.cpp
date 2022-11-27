@@ -39,7 +39,7 @@ void MixConverter::convert(void *params, BufferPipeline *buffer) {
                 _bufferPipeline.pos = 0;
                 _reader->readFullBuffer(&_bufferPipeline);
             }
-            buffer->buffer[buffer->pos+i] = (buffer->buffer[buffer->pos+i]/2 + _bufferPipeline.buffer[_bufferPipeline.pos+i]/4);
+            buffer->buffer[buffer->pos+i] = (buffer->buffer[buffer->pos+i]/2 + _bufferPipeline.buffer[_bufferPipeline.pos+i]/2);
             if(isOverflow){
                 counter++;
             }
@@ -127,16 +127,8 @@ void DistortionConverter::convert(void* params, BufferPipeline* buffer) {
                             }
                             break;
                         }
-
-
                     }
-
-
             }
-
-
         }
-
-
     }
 }

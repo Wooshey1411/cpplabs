@@ -4,6 +4,7 @@
 #include <memory>
 #include "header.h"
 #include "BufferPipeline.h"
+#include "Exceptions.h"
 
 class WAVReader{
 public:
