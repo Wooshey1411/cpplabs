@@ -28,6 +28,11 @@ public:
 
 class DistortionConverter : public Converter{
 public:
+    DistortionConverter();
     void convert(void* params, BufferPipeline* buffer) override;
     ~DistortionConverter() override = default;
+private:
+    short _maxV;
+    bool _isFinished;
+    unsigned int _extremumPos;
 };

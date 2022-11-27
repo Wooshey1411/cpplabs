@@ -72,24 +72,21 @@ DistortionConverter::DistortionConverter():_isFinished(true),_extremumPos(0),_ma
 void DistortionConverter::convert(void* params, BufferPipeline* buffer) {
     auto* ifcParams = static_cast<IFCParams*>(params);
     if(buffer->currSec >= ifcParams->initial && buffer->currSec <= ifcParams->final){
-        unsigned int inPos = 0;
-        unsigned int extremumPos = 0;
-        unsigned int fiPos = 0;
-        float coeff = 1.0-ifcParams->coefficient*1.0/100;
+        double coeff = 1.0-ifcParams->coefficient*1.0/100;
         for (int i = 1; i < buffer->frequency; ++i) {
             if(abs(buffer->buffer[buffer->pos+i-1]) > abs(buffer->buffer[buffer->pos+i]) || !_isFinished){
-                    if(_isFinished) {
-                        _extremumPos = buffer->pos + i - 1;
-                    }
-                    _maxV = static_cast<short>(roundf(abs(buffer->buffer[extremumPos]) * coeff));
-                    inPos = _extremumPos;
-                    fiPos = _extremumPos;
+                if(_isFinished) {
+                    _extremumPos = buffer->pos + i - 1;
+                }
+                    _maxV = static_cast<short>(round(abs(buffer->buffer[_extremumPos]) * coeff));
+                    unsigned int inPos = _extremumPos;
+                    unsigned int fiPos = _extremumPos;
                     buffer->buffer[_extremumPos] = _maxV;
                     bool leftDone=false;
                     bool rightDone = false;
                     while(true){
                         _isFinished = false;
-                        if(inPos > 1 && inPos >= (_extremumPos - buffer->frequency) && abs(buffer->buffer[inPos-1]) > _maxV && !leftDone && abs(buffer->buffer[inPos-1]) > abs(buffer->buffer[inPos-2])) {
+                        if(inPos > 1 && abs(buffer->buffer[inPos-1]) > _maxV && !leftDone && abs(buffer->buffer[inPos-1]) > abs(buffer->buffer[inPos-2])) {
 
                             if(buffer->buffer[inPos-1] < 0) {
                                 buffer->buffer[inPos - 1] = static_cast<short>(-_maxV);
@@ -101,7 +98,7 @@ void DistortionConverter::convert(void* params, BufferPipeline* buffer) {
                             leftDone = true;
                         }
 
-                        if(fiPos < lengthOfBuffer-1 && fiPos <= (_extremumPos + buffer->frequency) && abs(buffer->buffer[fiPos+1]) > _maxV && !rightDone && abs(buffer->buffer[fiPos+1]) > abs(buffer->buffer[fiPos+2])){
+                        if(fiPos < lengthOfBuffer-1 && fiPos < (buffer->pos+buffer->frequency) && abs(buffer->buffer[fiPos+1]) >= _maxV && !rightDone && abs(buffer->buffer[fiPos+1]) > abs(buffer->buffer[fiPos+2])){
                             if(buffer->buffer[fiPos+1] < 0) {
                                 buffer->buffer[fiPos + 1] = static_cast<short>(-_maxV);
                             }
@@ -114,7 +111,7 @@ void DistortionConverter::convert(void* params, BufferPipeline* buffer) {
                         }
 
                         if(leftDone && rightDone) {
-                            if(fiPos > (_extremumPos + buffer->frequency) &&  inPos < (_extremumPos - buffer->frequency)){
+                            if(fiPos < buffer->pos+buffer->frequency) {
                                 _isFinished = true;
                             }
                             break;
