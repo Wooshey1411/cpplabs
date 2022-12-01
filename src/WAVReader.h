@@ -2,7 +2,7 @@
 #include <iostream>
 #include <string>
 #include <memory>
-#include "header.h"
+#include "WAVheader.h"
 #include "BufferPipeline.h"
 #include "Exceptions.h"
 

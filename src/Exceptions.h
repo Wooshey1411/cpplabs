@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <utility>
 
 enum EXCEPTIONS{
     BAD_CONFIG = 1,
@@ -8,52 +9,26 @@ enum EXCEPTIONS{
     BAD_HEADER
 };
 
-
-class BaseException : public std::exception {
-protected:
-    std::string text;
+class NoFileException : public std::runtime_error{
 public:
-    virtual std::string what() = 0;
+    NoFileException() : std::runtime_error("File doesn't exist") {};
+    NoFileException(const std::string& msg): std::runtime_error(msg.c_str()){};
 };
 
-class WAVReaderException : public BaseException{
+class BadHeaderException : public std::runtime_error{
 public:
-    WAVReaderException();
-    WAVReaderException(std::string message);
-    std::string what() override;
+    BadHeaderException() :std::runtime_error("Header corrupted") {};
+    BadHeaderException(const std::string& msg): std::runtime_error(msg.c_str()){};
 };
 
-class NoFileException final : public WAVReaderException{
+class NoConfigException : public std::runtime_error{
 public:
-    NoFileException() : WAVReaderException() {text = "File doesn't exist";}
-    NoFileException(std::string message) : WAVReaderException(message){};
-    std::string what() override;
+    NoConfigException() :std::runtime_error("Config file doesn't exist") {};
+    NoConfigException(const std::string& msg): std::runtime_error(msg.c_str()){};
 };
 
-class BadHeaderException final : public WAVReaderException{
+class BadConfigException : public std::runtime_error{
 public:
-    BadHeaderException() : WAVReaderException() {text = "Header corrupted";}
-    BadHeaderException(std::string message) : WAVReaderException(message){};
-    std::string what() override;
-};
-
-class ConfigException : public BaseException{
-public:
-    ConfigException();
-    ConfigException(std::string message);
-    std::string what() override;
-};
-
-class NoConfigException final : public ConfigException{
-public:
-    NoConfigException() : ConfigException() {text = "Config file doesn't exist";}
-    NoConfigException(std::string message) : ConfigException(message){};
-    std::string what() override;
-};
-
-class BadConfigException final : public ConfigException{
-public:
-    BadConfigException() : ConfigException() {text = "Config corrupted";}
-    BadConfigException(std::string message) : ConfigException(message){};
-    std::string what() override;
+    BadConfigException() :std::runtime_error("Config corrupted") {};
+    BadConfigException(const std::string& msg): std::runtime_error(msg.c_str()){};
 };

@@ -1,3 +1,4 @@
+#pragma once
 #include "../BufferPipeline.h"
 class Converter{
 public:
