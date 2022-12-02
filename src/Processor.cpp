@@ -12,11 +12,9 @@ void Processor::convert(std::string_view in, std::string_view out, std::string_v
     writer.writeHeader(reader.getHeader());
     BufferPipeline buff;
     ConvertersFactory factory;
-    std::shared_ptr<Converter> converter = factory.createConverter(name);
-    int counter = 0;
+    std::unique_ptr<Converter> converter = factory.createConverter(name);
     while (reader.readSecond(&buff)){
         converter->convert(params,&buff);
         writer.writeSecond(&buff);
-        counter++;
     }
 }

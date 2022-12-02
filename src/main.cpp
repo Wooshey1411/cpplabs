@@ -6,33 +6,6 @@
 #include "Exceptions.h"
 #include "MainUtils.h"
 
-void printHelp(){
-    std::cout << "NAME\n";
-    std::cout << "          SoundProcessor - utility for transformations on wav files\n";
-
-    std::cout << "SYNOPSIS\n";
-    std::cout << "          SoundProcessor [-c config.txt output.wav input1.wav [input2.wav ...]]\n";
-
-    std::cout << "DESCRIPTION\n";
-    std::cout << "          Information of convertion on input1.wav stores in config.txt\n";
-    std::cout << "          Converted file write in output.wav\n";
-    std::cout << "          input2.wav ... need for some converters\n";
-    std::cout << "          Every string in config.txt includes name of conversion and params\n";
-    std::cout << "          In config.txt allows comment-string. They start with symbol '#'\n";
-
-    std::cout << "CONVERTERS\n";
-    std::cout << "          mute [INITIAL_SECOND] [FINAL_SECOND]\n";
-    std::cout << "               mute audio from INITIAL_SECOND to FINAL_SECOND\n\n";
-    std::cout << "          mix [#NUMBER] [INITIAL_SECOND]\n";
-    std::cout << "               mix input audio file with another by NUMBER in order of indication in arguments\n";
-    std::cout << "               from INITIAL_SECOND to end of file\n\n";
-    std::cout << "          bassBoosted [INITIAL_SECOND] [FINAL_SECOND]\n";
-    std::cout << "               make bass boosted effect from INITIAL_SECOND to FINAL_SECOND\n\n";
-    std::cout << "          distortion [INITIAL_SECOND] [FINAL_SECOND] [COEFFICIENT]\n";
-    std::cout << "               make distortion effect from INITIAL_SECOND to FINAL_SECOND\n";
-    std::cout << "               COEFFICIENT - level of cutting of wave in percents\n";
-}
-
 int main(int argc, char* argv[]) {
     if(!strcmp(argv[1],"-h") && argc == 2){
         printHelp();

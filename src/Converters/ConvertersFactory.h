@@ -6,8 +6,8 @@
 class ConvertersFactory {
 public:
     ConvertersFactory();
-    std::shared_ptr<Converter> createConverter(std::string_view);
+    std::unique_ptr<Converter> createConverter(std::string_view);
     ~ConvertersFactory() = default;
 private:
-    std::map<std::string,std::shared_ptr<Converter> (*)()> _converters;
+    std::map<std::string,std::unique_ptr<Converter> (*)()> _converters;
 };
