@@ -4,14 +4,14 @@
 
 class MuteConverter : public Converter{
 public:
-    void convert(void* params, BufferPipeline* buffer) override;
+    void convert(std::shared_ptr<Params> params, BufferPipeline* buffer) override;
     ~MuteConverter() override = default;
 };
 
 class MixConverter : public Converter{
 public:
     MixConverter();
-    void convert(void* params, BufferPipeline* buffer) override;
+    void convert(std::shared_ptr<Params> params, BufferPipeline* buffer) override;
     ~MixConverter() override = default;
 private:
     WAVReader* _reader;
@@ -22,14 +22,14 @@ private:
 
 class BassBoostedConverter : public Converter{
 public:
-    void convert(void* params, BufferPipeline* buffer) override;
+    void convert(std::shared_ptr<Params> params, BufferPipeline* buffer) override;
     ~BassBoostedConverter() override = default;
 };
 
 class DistortionConverter : public Converter{
 public:
     DistortionConverter();
-    void convert(void* params, BufferPipeline* buffer) override;
+    void convert(std::shared_ptr<Params> params, BufferPipeline* buffer) override;
     ~DistortionConverter() override = default;
 private:
     short _maxV;

@@ -1,11 +1,11 @@
 #include "Processor.h"
 #include "WAVWriter.h"
 #include "WAVReader.h"
-#include "Params.h"
+#include "Params/Params.h"
 #include "BufferPipeline.h"
 #include "Converters/ConvertersFactory.h"
 
-void Processor::convert(std::string_view in, std::string_view out, std::string_view name, void* params) {
+void Processor::convert(std::string_view in, std::string_view out, std::string_view name,  std::shared_ptr<Params> params) {
     WAVReader reader(in);
     WAVWriter writer(out);
     reader.readHeader();

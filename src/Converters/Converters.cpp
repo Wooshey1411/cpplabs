@@ -1,13 +1,14 @@
 #include "Converters.h"
-#include "../Params.h"
+#include "../Params/Params.h"
 #include <cmath>
 
 inline const unsigned short BASS_BOOSTED_VOLUME = 1000;
 inline const unsigned short BASS_BOOSTED_VOLUME_COEFFICIENT = 16;
 
-void MuteConverter::convert(void* params, BufferPipeline* buffer) {
-    auto* ifParams = static_cast<IFParams*>(params);
-    if(buffer->currSec >= ifParams->initial && buffer->currSec <= ifParams->final){
+void MuteConverter::convert(std::shared_ptr<Params> params, BufferPipeline* buffer) {
+    auto initial = std::any_cast<unsigned int>(params->getParams(1));
+    auto final = std::any_cast<unsigned int>(params->getParams(2));
+    if(buffer->currSec >= initial && buffer->currSec <= final){
         for (int i = 0; i < buffer->frequency; ++i) {
             buffer->buffer[buffer->pos+i] = 0;
         }
@@ -16,17 +17,18 @@ void MuteConverter::convert(void* params, BufferPipeline* buffer) {
 
 MixConverter::MixConverter():_isInitialized(false),_isFinished(false) {}
 
-void MixConverter::convert(void *params, BufferPipeline *buffer) {
-    auto* piparams = static_cast<PIParams*>(params);
+void MixConverter::convert(std::shared_ptr<Params> params, BufferPipeline *buffer) {
+    auto path = std::any_cast<std::string>(params->getParams(1));
+    auto initial = std::any_cast<unsigned int>(params->getParams(2));
 
     if(!_isInitialized){
-        _reader = new WAVReader(piparams->path);
+        _reader = new WAVReader(path);
         _reader->readHeader();
         _reader->readFullBuffer(&_bufferPipeline);
         _isInitialized = true;
     }
 
-    if(buffer->currSec >= piparams->initial && !_isFinished){
+    if(buffer->currSec >= initial && !_isFinished){
         bool isOverflow = false;
         unsigned int counter = 0;
         for (int i = 0; i < buffer->frequency; ++i) {
@@ -52,9 +54,10 @@ void MixConverter::convert(void *params, BufferPipeline *buffer) {
     }
 }
 
-void BassBoostedConverter::convert(void *params, BufferPipeline *buffer) {
-    auto* ifParams = static_cast<IFParams*>(params);
-    if(buffer->currSec >= ifParams->initial && buffer->currSec <= ifParams->final){
+void BassBoostedConverter::convert(std::shared_ptr<Params> params, BufferPipeline *buffer) {
+    auto initial = std::any_cast<unsigned int>(params->getParams(1));
+    auto final = std::any_cast<unsigned int>(params->getParams(2));
+    if(buffer->currSec >= initial && buffer->currSec <= final){
         for (int i = 0; i < buffer->frequency; ++i) {
             if(buffer->buffer[buffer->pos+i] > BASS_BOOSTED_VOLUME){
                 buffer->buffer[buffer->pos+i]=BASS_BOOSTED_VOLUME;
@@ -78,10 +81,13 @@ bool sign (int num){
     }
 }
 
-void DistortionConverter::convert(void* params, BufferPipeline* buffer) {
-    auto* ifcParams = static_cast<IFCParams*>(params);
-    if(buffer->currSec >= ifcParams->initial && buffer->currSec <= ifcParams->final){
-        double coeff = 1.0-ifcParams->coefficient*1.0/100;
+void DistortionConverter::convert(std::shared_ptr<Params> params, BufferPipeline* buffer) {
+    auto initial = std::any_cast<unsigned int>(params->getParams(1));
+    auto final = std::any_cast<unsigned int>(params->getParams(2));
+    auto coefficient = std::any_cast<unsigned int>(params->getParams(3));
+
+    if(buffer->currSec >= initial && buffer->currSec <= final){
+        double coeff = 1.0-coefficient*1.0/100;
         for (int i = 1; i < buffer->frequency; ++i) {
             if(abs(buffer->buffer[buffer->pos+i-1]) > abs(buffer->buffer[buffer->pos+i]) || !_isFinished){
                 if(_isFinished) {
