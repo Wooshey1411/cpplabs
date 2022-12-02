@@ -1,4 +1,5 @@
 #include <string>
+#include <any>
 typedef struct INITIAL_FINAL_PARAMS{
     unsigned int initial;
     unsigned int final;
@@ -16,37 +17,48 @@ typedef struct INITIAL_FINAL_COEFFICIENT{
 } IFCParams;
 
 
-
-/*
 class Params{
 protected:
-    unsigned int _code;
+    unsigned int _countOfParams;
 public:
-    unsigned int code() {return _code;};
-    Params(unsigned int code):_code(code) {};
+    Params();
+    unsigned int countOfParams() {return _countOfParams;};
+    virtual void setParams(unsigned int pos, std::any arg) = 0;
+    virtual std::any getParams(unsigned int pos) = 0;
     virtual ~Params() = default;
 };
 
-class IFParams : public Params{
+class IFParamsC : public Params{
 public:
-    unsigned int initial;
-    unsigned int final;
-    ~IFParams() override = default;
+    IFParamsC();
+    void setParams(unsigned int pos, std::any arg) override;
+    std::any getParams(unsigned int pos) override;
+    ~IFParamsC() override = default;
+private:
+    unsigned int _initial;
+    unsigned int _final;
 };
 
-class PIPParams : public Params{
+class PIPParamsC : public Params{
 public:
-    unsigned int initial;
-    std::string path;
+    PIPParamsC();
+    void setParams(unsigned int pos, std::any arg) override;
+    std::any getParams(unsigned int pos) override;
+    ~PIPParamsC() override = default;
+private:
+    unsigned int _initial;
+    std::string _path;
     void (*pFunction)();
-    ~PIPParams() override = default;
 };
 
-class IFCParams : public Params{
+class IFCParamsC : public Params{
 public:
-    unsigned int initial;
-    unsigned int final;
-    unsigned int coefficient;
-    ~IFCParams() override = default;
+    IFCParamsC();
+    void setParams(unsigned int pos, std::any arg) override;
+    std::any getParams(unsigned int pos) override;
+    ~IFCParamsC() override = default;
+private:
+    unsigned int _initial;
+    unsigned int _final;
+    unsigned int _coefficient;
 };
-*/

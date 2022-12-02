@@ -1,12 +1,11 @@
 #include <iostream>
-#include <fstream>
-#include <string>
 #include "Processor.h"
 #include "Params.h"
 #include <vector>
 #include <cstring>
 #include "ConfigParser.h"
 #include "Exceptions.h"
+
 
 void printHelp(){
     std::cout << "NAME\n";
@@ -105,5 +104,12 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    return 0;
+
+  /* PIPParamsC ifcParamsC;
+   ifcParamsC.setParams(2,std::make_any<unsigned int>(7));
+   ifcParamsC.setParams(3,std::make_any<void (*)()>(printHelp));
+
+   std::cout << std::any_cast<unsigned int> (ifcParamsC.getParams(2)) << "\n";
+   std::any_cast<void (*)()>(ifcParamsC.getParams(3))();
+    return 0;*/
 }
