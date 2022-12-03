@@ -1,6 +1,7 @@
 #pragma once
 #include "Converter.h"
 #include "../WAVReader.h"
+#include "StreamLinker.h"
 
 class MuteConverter : public Converter{
 public:
@@ -14,7 +15,7 @@ public:
     void convert(std::shared_ptr<Params> params, BufferPipeline* buffer) override;
     ~MixConverter() override = default;
 private:
-    WAVReader* _reader;
+    StreamLinker* _streamLinker;
     BufferPipeline _bufferPipeline;
     bool _isInitialized;
     bool _isFinished;

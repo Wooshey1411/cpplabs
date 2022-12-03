@@ -22,9 +22,8 @@ void MixConverter::convert(std::shared_ptr<Params> params, BufferPipeline *buffe
     auto initial = std::any_cast<unsigned int>(params->getParams(2));
 
     if(!_isInitialized){
-        _reader = new WAVReader(path);
-        _reader->readHeader();
-        _reader->readFullBuffer(&_bufferPipeline);
+        _streamLinker = new StreamLinker(path);
+        _streamLinker->fillBuffer(&_bufferPipeline);
         _isInitialized = true;
     }
 
@@ -39,7 +38,7 @@ void MixConverter::convert(std::shared_ptr<Params> params, BufferPipeline *buffe
             if(_bufferPipeline.pos+i == LENGTH_OF_BUFFER){
                 isOverflow = true;
                 _bufferPipeline.pos = 0;
-                _reader->readFullBuffer(&_bufferPipeline);
+                _streamLinker->fillBuffer(&_bufferPipeline);
             }
             buffer->buffer[buffer->pos+i] = (buffer->buffer[buffer->pos+i]/2 + _bufferPipeline.buffer[_bufferPipeline.pos+i]/2);
             if(isOverflow){
