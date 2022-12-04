@@ -1,6 +1,7 @@
 #include "Converters.h"
 #include "../Params/Params.h"
 #include <cmath>
+#include <iomanip>
 
 inline const unsigned short BASS_BOOSTED_VOLUME = 1000;
 inline const unsigned short BASS_BOOSTED_VOLUME_COEFFICIENT = 16;
@@ -13,6 +14,11 @@ void MuteConverter::convert(std::shared_ptr<Params> params, BufferPipeline* buff
             buffer->buffer[buffer->pos+i] = 0;
         }
     }
+}
+
+void MuteConverter::printDescription(){
+    std::cout << std::setw(10) << std::cout.fill() << "mute [INITIAL_SECOND] [FINAL_SECOND]\n";
+    std::cout << std::setw(15) << std::cout.fill() << "mute audio from INITIAL_SECOND to FINAL_SECOND\n\n";
 }
 
 MixConverter::MixConverter():_isInitialized(false),_isFinished(false) {}
@@ -53,6 +59,12 @@ void MixConverter::convert(std::shared_ptr<Params> params, BufferPipeline *buffe
     }
 }
 
+void MixConverter::printDescription(){
+    std::cout << std::setw(10) << std::cout.fill() << "mix [#NUMBER] [INITIAL_SECOND]\n";
+    std::cout << std::setw(15) << std::cout.fill() << "mix input audio file with another by NUMBER in order of indication in arguments\n";
+    std::cout << std::setw(15) << std::cout.fill() << "from INITIAL_SECOND to end of file\n\n";
+}
+
 void BassBoostedConverter::convert(std::shared_ptr<Params> params, BufferPipeline *buffer) {
     auto initial = std::any_cast<unsigned int>(params->getParams(1));
     auto final = std::any_cast<unsigned int>(params->getParams(2));
@@ -67,6 +79,11 @@ void BassBoostedConverter::convert(std::shared_ptr<Params> params, BufferPipelin
             buffer->buffer[buffer->pos+i]*=BASS_BOOSTED_VOLUME_COEFFICIENT;
         }
     }
+}
+
+void BassBoostedConverter::printDescription(){
+    std::cout << std::setw(10) << std::cout.fill() << "bassBoosted [INITIAL_SECOND] [FINAL_SECOND]\n";
+    std::cout << std::setw(15) << std::cout.fill() << "make bass boosted effect from INITIAL_SECOND to FINAL_SECOND\n\n";
 }
 
 DistortionConverter::DistortionConverter():_isFinished(true),_extremumPos(0),_maxV(0) {}
@@ -136,4 +153,10 @@ void DistortionConverter::convert(std::shared_ptr<Params> params, BufferPipeline
             }
         }
     }
+}
+
+void DistortionConverter::printDescription(){
+    std::cout << std::setw(10) << std::cout.fill() << "distortion [INITIAL_SECOND] [FINAL_SECOND] [COEFFICIENT]\n";
+    std::cout << std::setw(15) << std::cout.fill() << "make distortion effect from INITIAL_SECOND to FINAL_SECOND\n";
+    std::cout << std::setw(15) << std::cout.fill() << "COEFFICIENT - level of cutting of wave in percents\n\n";
 }

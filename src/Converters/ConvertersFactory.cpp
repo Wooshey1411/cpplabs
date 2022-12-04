@@ -22,3 +22,9 @@ std::unique_ptr<Converter> ConvertersFactory::createConverter(std::string_view n
     }
     throw std::runtime_error("Fabric: Converter with such name doesn't exist");
 }
+
+void ConvertersFactory::printDescriptions() {
+    for(auto & _converter : _converters){
+        _converter.second()->printDescription();
+    }
+}

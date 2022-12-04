@@ -6,6 +6,7 @@
 class MuteConverter : public Converter{
 public:
     void convert(std::shared_ptr<Params> params, BufferPipeline* buffer) override;
+    void printDescription() override;
     ~MuteConverter() override = default;
 };
 
@@ -13,6 +14,7 @@ class MixConverter : public Converter{
 public:
     MixConverter();
     void convert(std::shared_ptr<Params> params, BufferPipeline* buffer) override;
+    void printDescription() override;
     ~MixConverter() override = default;
 private:
     StreamLinker* _streamLinker;
@@ -24,6 +26,7 @@ private:
 class BassBoostedConverter : public Converter{
 public:
     void convert(std::shared_ptr<Params> params, BufferPipeline* buffer) override;
+    void printDescription() override;
     ~BassBoostedConverter() override = default;
 };
 
@@ -31,6 +34,7 @@ class DistortionConverter : public Converter{
 public:
     DistortionConverter();
     void convert(std::shared_ptr<Params> params, BufferPipeline* buffer) override;
+    void printDescription() override;
     ~DistortionConverter() override = default;
 private:
     short _maxV;

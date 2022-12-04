@@ -27,7 +27,3 @@ void WAVWriter::writeSecond(BufferPipeline* bufferPipeline) {
     }
     bufferPipeline->pos+=bufferPipeline->frequency;
 }
-
-WAVWriter::~WAVWriter() {
-    fclose(_writer);
-}

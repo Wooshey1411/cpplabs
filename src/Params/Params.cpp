@@ -19,7 +19,7 @@ void IFParamsC::setParams(unsigned int pos, std::any arg) {
             _final = std::any_cast<unsigned int>(arg);
             break;
         default:
-            throw std::exception();
+            throw std::runtime_error("Param out of range");
     }
 }
 
@@ -30,7 +30,7 @@ std::any IFParamsC::getParams(unsigned int pos) {
         case 2:
             return std::make_any<unsigned int>(_final);
         default:
-            throw std::exception();
+            throw std::runtime_error("Param out of range");
     }
 }
 
@@ -49,7 +49,7 @@ void PIPParamsC::setParams(unsigned int pos, std::any arg) {
             _initial = std::any_cast<unsigned int>(arg);
             break;
         default:
-            throw std::exception();
+            throw std::runtime_error("Param out of range");
     }
 }
 
@@ -60,7 +60,7 @@ std::any PIPParamsC::getParams(unsigned int pos) {
         case 2:
             return std::make_any<unsigned int>(_initial);
         default:
-            throw std::exception();
+            throw std::runtime_error("Param out of range");
     }
 }
 
@@ -83,7 +83,7 @@ void IFCParamsC::setParams(unsigned int pos, std::any arg) {
             _coefficient = std::any_cast<unsigned int>(arg);
             break;
         default:
-            throw std::exception();
+            throw std::runtime_error("Param out of range");
     }
 }
 
@@ -96,6 +96,6 @@ std::any IFCParamsC::getParams(unsigned int pos) {
         case 3:
             return std::make_any<unsigned int>(_coefficient);
         default:
-            throw std::exception();
+            throw std::runtime_error("Param out of range");
     }
 }

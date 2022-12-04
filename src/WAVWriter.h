@@ -9,10 +9,9 @@ public:
     WAVWriter(std::string_view);
     void writeHeader(const Header*);
     void writeSecond(BufferPipeline*);
-    ~WAVWriter();
+    ~WAVWriter() = default;
 
 private:
     std::string _path;
     std::fstream _out;
-    FILE* _writer;
 };

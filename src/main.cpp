@@ -78,5 +78,6 @@ int main(int argc, char* argv[]) {
             remove("tmp2");
         }
     }
+    std::cout << "\nConverted successfully\n";
     return 0;
 }
