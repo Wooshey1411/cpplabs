@@ -2,7 +2,7 @@
 #include "WAVheader.h"
 #include "BufferPipeline.h"
 #include <iostream>
-
+#include <fstream>
 
 class WAVWriter {
 public:
@@ -13,5 +13,6 @@ public:
 
 private:
     std::string _path;
+    std::fstream _out;
     FILE* _writer;
 };

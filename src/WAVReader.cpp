@@ -1,15 +1,16 @@
 #include "WAVReader.h"
 
 WAVReader::WAVReader(std::string_view path):_path(path){
-    _reader = fopen(_path.c_str(),"rb");
+    _in.open(_path, std::fstream::in | std::fstream::binary);
+
     _wavHeader.listExist = false;
 }
 
 void WAVReader::readHeader() {
-    if(!_reader){
+    if(!_in.is_open()){
         throw NoFileException();
     }
-    fread(&_wavHeader.headerMain,sizeof(_wavHeader.headerMain),1,_reader);
+    _in.read(reinterpret_cast<char*>(&_wavHeader.headerMain),sizeof(_wavHeader.headerMain));
 
     if(_wavHeader.headerMain.RIFF[0] != 'R' ||_wavHeader.headerMain.RIFF[1] != 'I'
     || _wavHeader.headerMain.RIFF[2] != 'F' || _wavHeader.headerMain.RIFF[3] != 'F'){
@@ -17,35 +18,36 @@ void WAVReader::readHeader() {
     }
 
     char checker;
-    long pos = ftell(_reader);
+     long long pos = _in.tellg();
 
-    fread(&checker,1,1,_reader);
-    fseek(_reader,pos,0);
-    if(checker != 'L' && checker != 'd')
+    _in.read(reinterpret_cast<char*>(&checker),sizeof(char));
+    _in.seekg(pos);
+    if(checker != 'L' && checker != 'd') {
         throw BadHeaderException();
+    }
 
     if(checker == 'L'){
 
-        fread(&_wavHeader.listHeader.LIST,align,1,_reader);
+       _in.read(reinterpret_cast<char*>(&_wavHeader.listHeader.LIST[0]),align);
+
         if(_wavHeader.listHeader.LIST[0] != 'L' || _wavHeader.listHeader.LIST[1] != 'I'
         || _wavHeader.listHeader.LIST[2] != 'S' || _wavHeader.listHeader.LIST[3] != 'T'){
             throw BadHeaderException();
         }
-        fread(&_wavHeader.listHeader.listSize,sizeof(uint32_t),1,_reader);
+        _in.read(reinterpret_cast<char*>(&_wavHeader.listHeader.listSize),sizeof(uint32_t));
         _wavHeader.listExist = true;
         _wavHeader.listHeader.list = new unsigned char[_wavHeader.listHeader.listSize+1];
-        fread(&_wavHeader.listHeader.list[0],_wavHeader.listHeader.listSize,1,_reader);
+        _in.read(reinterpret_cast<char*>(&_wavHeader.listHeader.list[0]),_wavHeader.listHeader.listSize);
     }else{
         _wavHeader.listExist = false;
     }
 
-    fread(&_wavHeader.DATA,align,1,_reader);
+   _in.read(reinterpret_cast<char*>(&_wavHeader.DATA[0]),align);
     if(_wavHeader.DATA[0] != 'd' || _wavHeader.DATA[1] != 'a'
        || _wavHeader.DATA[2] != 't' || _wavHeader.DATA[3] != 'a'){
         throw BadHeaderException();
     }
-    fread(&_wavHeader.subChunk2Size,sizeof(uint32_t),1,_reader);
-
+    _in.read(reinterpret_cast<char*>(&_wavHeader.subChunk2Size),sizeof(uint32_t));
 
 
 }
@@ -108,16 +110,19 @@ bool WAVReader::readSecond(BufferPipeline* bufferPipeline) {
         bufferPipeline->currSec++;
     }
 
-    if(feof(_reader)){
+    if(_in.eof()){
         return false;
     }
     if(bufferPipeline->pos+bufferPipeline->frequency >= LENGTH_OF_BUFFER){
         bufferPipeline->pos = 0;
     }
-    unsigned int readed = fread(&(bufferPipeline->buffer[bufferPipeline->pos]),2,bufferPipeline->frequency,_reader);
-    if(feof(_reader)){
-        bufferPipeline->endPos = bufferPipeline->pos + readed;
-    }
+
+    _in.read(reinterpret_cast<char*>(&bufferPipeline->buffer[bufferPipeline->pos]),sizeof(uint16_t)*bufferPipeline->frequency);
+    unsigned long long readed = _in.gcount() / sizeof(uint16_t);
+
+   if(_in.eof()){
+       bufferPipeline->endPos = bufferPipeline->pos + readed;
+   }
     return true;
 }
 
@@ -126,11 +131,12 @@ bool WAVReader::readFullBuffer(BufferPipeline* bufferPipeline) {
         bufferPipeline->frequency = _wavHeader.headerMain.samplesPerSec;
     }
 
-    if(feof(_reader)){
+    if(_in.eof()){
         return false;
     }
-    unsigned int readed;
-    readed = fread(&(bufferPipeline->buffer[bufferPipeline->pos]),2,LENGTH_OF_BUFFER-bufferPipeline->pos,_reader);
+
+    _in.read(reinterpret_cast<char*>(&bufferPipeline->buffer[bufferPipeline->pos]),sizeof(uint16_t)*(LENGTH_OF_BUFFER-bufferPipeline->pos));
+    unsigned long long readed = _in.gcount() / sizeof(uint16_t);
     if (readed != LENGTH_OF_BUFFER-bufferPipeline->pos){
         bufferPipeline->endPos = bufferPipeline->pos + readed;
     }
@@ -140,6 +146,5 @@ bool WAVReader::readFullBuffer(BufferPipeline* bufferPipeline) {
 WAVReader::~WAVReader() {
     if(_wavHeader.listExist)
         delete[] _wavHeader.listHeader.list;
-    fclose(_reader);
 }
 

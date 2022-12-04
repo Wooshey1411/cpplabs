@@ -1,7 +1,7 @@
 #pragma once
-#include <iostream>
 #include <string>
 #include <memory>
+#include <fstream>
 #include "WAVheader.h"
 #include "BufferPipeline.h"
 #include "Exceptions.h"
@@ -16,7 +16,7 @@ public:
     bool readFullBuffer(BufferPipeline*);
     ~WAVReader();
 private:
+    std::fstream _in;
     std::string _path;
-    FILE* _reader;
     Header _wavHeader;
 };

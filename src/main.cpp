@@ -77,9 +77,5 @@ int main(int argc, char* argv[]) {
             remove("tmp2");
         }
     }
-
-    // ifcParamsC.setParams(3,std::make_any<void (*)()>(printHelp));
-
-    // std::any_cast<void (*)()>(ifcParamsC.getParams(3))();
     return 0;
 }
