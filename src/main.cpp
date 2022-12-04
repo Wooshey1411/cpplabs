@@ -72,6 +72,7 @@ int main(int argc, char* argv[]) {
         if(converters.size() == 2){
             remove("tmp1");
         }
+
         if(converters.size() >=3){
             remove("tmp1");
             remove("tmp2");
