@@ -1,0 +1,2 @@
+mute 1 10
+bassBoosted 0 200
