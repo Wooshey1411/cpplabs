@@ -9,7 +9,7 @@ void MuteConverter::convert(std::shared_ptr<Params> params, BufferPipeline* buff
     auto initial = std::any_cast<unsigned int>(params->getParams(1));
     auto final = std::any_cast<unsigned int>(params->getParams(2));
     if(buffer->currSec >= initial && buffer->currSec <= final){
-        for (int i = 0; i < buffer->frequency; ++i) {
+        for (unsigned int i = 0; i < buffer->frequency; ++i) {
             buffer->buffer[buffer->pos+i] = 0;
         }
     }
@@ -35,7 +35,7 @@ void MixConverter::convert(std::shared_ptr<Params> params, BufferPipeline *buffe
     if(buffer->currSec >= initial && !_isFinished){
         bool isOverflow = false;
         unsigned int counter = 0;
-        for (int i = 0; i < buffer->frequency; ++i) {
+        for (unsigned int i = 0; i < buffer->frequency; ++i) {
             if(_bufferPipeline.endPos != 0 && _bufferPipeline.pos+i == _bufferPipeline.endPos){
                 _isFinished = true;
                 break;
@@ -68,7 +68,7 @@ void BassBoostedConverter::convert(std::shared_ptr<Params> params, BufferPipelin
     auto initial = std::any_cast<unsigned int>(params->getParams(1));
     auto final = std::any_cast<unsigned int>(params->getParams(2));
     if(buffer->currSec >= initial && buffer->currSec <= final){
-        for (int i = 0; i < buffer->frequency; ++i) {
+        for (unsigned int i = 0; i < buffer->frequency; ++i) {
             if(buffer->buffer[buffer->pos+i] > BASS_BOOSTED_VOLUME){
                 buffer->buffer[buffer->pos+i]=BASS_BOOSTED_VOLUME;
             }
@@ -85,7 +85,7 @@ void BassBoostedConverter::printDescription(){
     std::cout << std::setw(15) << std::cout.fill() << "make bass boosted effect from INITIAL_SECOND to FINAL_SECOND\n\n";
 }
 
-DistortionConverter::DistortionConverter():_isFinished(true),_extremumPos(0),_maxV(0) {}
+DistortionConverter::DistortionConverter():_maxV(0),_isFinished(true),_extremumPos(0) {}
 
 bool sign (int num){
     if (num >= 0) {
@@ -103,7 +103,7 @@ void DistortionConverter::convert(std::shared_ptr<Params> params, BufferPipeline
 
     if(buffer->currSec >= initial && buffer->currSec <= final){
         double coeff = 1.0-coefficient*1.0/100;
-        for (int i = 1; i < buffer->frequency; ++i) {
+        for (unsigned int i = 1; i < buffer->frequency; ++i) {
             if(abs(buffer->buffer[buffer->pos+i-1]) > abs(buffer->buffer[buffer->pos+i]) || !_isFinished){
                 if(_isFinished) {
                     _extremumPos = buffer->pos + i - 1;

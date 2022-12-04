@@ -22,7 +22,8 @@ void WAVReader::readHeader() {
         throw BadHeaderException();
     }
 
-    if(_wavHeader.headerMain.subChunk1Size != sizeof(uint16_t)*8 || _wavHeader.headerMain.audioFormat != 1){
+    if(_wavHeader.headerMain.subChunk1Size != sizeof(uint16_t)*8 || _wavHeader.headerMain.audioFormat != 1
+    || _wavHeader.headerMain.samplesPerSec != 44100 || _wavHeader.headerMain.countOfChannels != 1 || _wavHeader.headerMain.blockAlign != 2){
         throw BadHeaderException("unsupportable format");
     }
 
@@ -58,6 +59,14 @@ void WAVReader::readHeader() {
     }
     _in.read(reinterpret_cast<char*>(&_wavHeader.subChunk2Size),sizeof(uint32_t));
 
+}
+
+void WAVReader::setHeaderToStereo(uint32_t subchunk2size) {
+    _wavHeader.headerMain.countOfChannels = 2;
+    _wavHeader.headerMain.bytesPerSec*=2;
+    _wavHeader.headerMain.blockAlign*=2;
+    _wavHeader.subChunk2Size+=subchunk2size;
+    _wavHeader.headerMain.chunkSize+=subchunk2size;
 }
 
 void WAVReader::printHeader() {
@@ -98,7 +107,7 @@ void WAVReader::printHeader() {
                   << _wavHeader.listHeader.LIST[3] << "\n";
         std::cout << "list count                 :" << _wavHeader.listHeader.listSize << "\n";
         std::cout << "list                       :" << "\n";
-        for (int i = 0; i < _wavHeader.listHeader.listSize; ++i) {
+        for (unsigned int i = 0; i < _wavHeader.listHeader.listSize; ++i) {
             std::cout << _wavHeader.listHeader.list[i];
         }
         std::cout << std::endl;

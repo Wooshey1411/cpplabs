@@ -82,7 +82,7 @@ void getParamsAndConverters(std::vector<std::string> files, std::vector<std::str
         switch (code) {
             case Codes::IF: {
                 auto param = std::make_shared<IFParamsC>();
-                for (int i = 1; i <= param->countOfParams(); ++i) {
+                for (unsigned int i = 1; i <= param->countOfParams(); ++i) {
                     if(iterator == config.end()){
                         throw BadConfigException();
                     }
@@ -94,7 +94,7 @@ void getParamsAndConverters(std::vector<std::string> files, std::vector<std::str
             }
             case Codes::IFC:{
                 auto param = std::make_shared<IFCParamsC>();
-                for (int i = 1; i <= param->countOfParams(); ++i) {
+                for (unsigned int i = 1; i <= param->countOfParams(); ++i) {
                     if(iterator == config.end()){
                         throw BadConfigException();
                     }
