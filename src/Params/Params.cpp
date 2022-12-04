@@ -1,6 +1,5 @@
 #include "Params.h"
 #include <iostream>
-#include "../Exceptions.h"
 
 Params::Params():_countOfParams(0) {}
 

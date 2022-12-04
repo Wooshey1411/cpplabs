@@ -1,5 +1,4 @@
 #include "Converters.h"
-#include "../Params/Params.h"
 #include <cmath>
 #include <iomanip>
 

@@ -8,7 +8,7 @@ class WAVWriter {
 public:
     WAVWriter(std::string_view);
     void writeHeader(const Header*);
-    void writeSecond(BufferPipeline*);
+    void writeByFrequency(BufferPipeline*);
     ~WAVWriter() = default;
 
 private:

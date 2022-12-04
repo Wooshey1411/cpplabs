@@ -102,7 +102,7 @@ const Header *WAVReader::getHeader() {
     return &_wavHeader;
 }
 
-bool WAVReader::readSecond(BufferPipeline* bufferPipeline) {
+bool WAVReader::readByFrequency(BufferPipeline* bufferPipeline) {
 
     if(bufferPipeline->frequency == 0){
         bufferPipeline->frequency = _wavHeader.headerMain.samplesPerSec;

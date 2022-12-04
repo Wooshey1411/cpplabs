@@ -12,7 +12,7 @@ public:
     void readHeader();
     void printHeader();
     const Header* getHeader();
-    bool readSecond(BufferPipeline*);
+    bool readByFrequency(BufferPipeline*);
     bool readFullBuffer(BufferPipeline*);
     ~WAVReader();
 private:

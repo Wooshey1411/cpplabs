@@ -23,7 +23,7 @@ protected:
     unsigned int _countOfParams;
 public:
     Params();
-    unsigned int countOfParams() {return _countOfParams;};
+    unsigned int countOfParams() const {return _countOfParams;};
     virtual void setParams(unsigned int pos, std::any arg) = 0;
     virtual std::any getParams(unsigned int pos) = 0;
     virtual ~Params() = default;

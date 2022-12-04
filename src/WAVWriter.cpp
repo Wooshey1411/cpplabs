@@ -18,7 +18,7 @@ void WAVWriter::writeHeader(const Header* wavHeader) {
     _out.write(reinterpret_cast<char*>(&h.subChunk2Size),sizeof(uint32_t));
 }
 
-void WAVWriter::writeSecond(BufferPipeline* bufferPipeline) {
+void WAVWriter::writeByFrequency(BufferPipeline* bufferPipeline) {
     if(bufferPipeline->endPos == 0) {
        _out.write(reinterpret_cast<char*>(&bufferPipeline->buffer[bufferPipeline->pos]),sizeof(uint16_t)*bufferPipeline->frequency);
     }

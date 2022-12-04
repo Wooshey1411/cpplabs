@@ -5,7 +5,7 @@
 #include "BufferPipeline.h"
 #include "Converters/ConvertersFactory.h"
 
-void Processor::convert(std::string_view in, std::string_view out, std::string_view name,  std::shared_ptr<Params> params) {
+void Processor::convert(std::string_view in, std::string_view out, std::string_view name,  const std::shared_ptr<Params>& params) {
     WAVReader reader(in);
     WAVWriter writer(out);
     reader.readHeader();
@@ -13,8 +13,8 @@ void Processor::convert(std::string_view in, std::string_view out, std::string_v
     BufferPipeline buff;
     ConvertersFactory factory;
     std::unique_ptr<Converter> converter = factory.createConverter(name);
-    while (reader.readSecond(&buff)){
+    while (reader.readByFrequency(&buff)){
         converter->convert(params,&buff);
-        writer.writeSecond(&buff);
+        writer.writeByFrequency(&buff);
     }
 }

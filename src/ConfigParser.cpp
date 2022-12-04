@@ -1,9 +1,10 @@
 #include "ConfigParser.h"
 #include <fstream>
+#include <utility>
 #include "Params/Params.h"
 #include "Exceptions.h"
 
-ConfigParser::ConfigParser(std::string path):_path(path) {}
+ConfigParser::ConfigParser(std::string  path):_path(std::move(path)) {}
 
 void ConfigParser::parse(std::vector<std::string> &config) {
     std::ifstream in;
