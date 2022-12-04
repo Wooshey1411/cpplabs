@@ -109,6 +109,9 @@ void getParamsAndConverters(std::vector<std::string> files, std::vector<std::str
                 if(iterator == config.end()){
                     throw BadConfigException();
                 }
+                if ((*iterator)[0] != '$'){
+                    throw BadConfigException();
+                }
                 unsigned int pos = getValue(*iterator,true);
 
                 if(pos+2 >= files.size()){

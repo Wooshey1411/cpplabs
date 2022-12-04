@@ -59,7 +59,7 @@ void MixConverter::convert(std::shared_ptr<Params> params, BufferPipeline *buffe
 }
 
 void MixConverter::printDescription(){
-    std::cout << std::setw(10) << std::cout.fill() << "mix [#NUMBER] [INITIAL_SECOND]\n";
+    std::cout << std::setw(10) << std::cout.fill() << "mix [$NUMBER] [INITIAL_SECOND]\n";
     std::cout << std::setw(15) << std::cout.fill() << "mix input audio file with another by NUMBER in order of indication in arguments\n";
     std::cout << std::setw(15) << std::cout.fill() << "from INITIAL_SECOND to end of file\n\n";
 }

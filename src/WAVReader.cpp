@@ -17,6 +17,15 @@ void WAVReader::readHeader() {
         throw BadHeaderException();
     }
 
+    if(_wavHeader.headerMain.fmt[0] != 'f' ||_wavHeader.headerMain.fmt[1] != 'm'
+       || _wavHeader.headerMain.fmt[2] != 't' || _wavHeader.headerMain.fmt[3] != ' '){
+        throw BadHeaderException();
+    }
+
+    if(_wavHeader.headerMain.subChunk1Size != sizeof(uint16_t)*8 || _wavHeader.headerMain.audioFormat != 1){
+        throw BadHeaderException("unsupportable format");
+    }
+
     char checker;
      long long pos = _in.tellg();
 
@@ -48,7 +57,6 @@ void WAVReader::readHeader() {
         throw BadHeaderException();
     }
     _in.read(reinterpret_cast<char*>(&_wavHeader.subChunk2Size),sizeof(uint32_t));
-
 
 }
 

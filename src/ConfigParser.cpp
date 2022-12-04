@@ -18,6 +18,10 @@ void ConfigParser::parse(std::vector<std::string> &config) {
         }
         std::string str;
         in >> str;
+        if(str[0] == '#'){
+            std::getline(in,str);
+            continue;
+        }
         config.push_back(str);
     }
 }
