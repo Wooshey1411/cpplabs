@@ -111,6 +111,10 @@ void getParamsAndConverters(std::vector<std::string> files, std::vector<std::str
                 }
                 unsigned int pos = getValue(*iterator,true);
 
+                if(pos+2 >= files.size()){
+                    throw BadConfigException("Invalid #NUMBER");
+                }
+
                 param->setParams(1,std::make_any<std::string>(files[2+pos]));
                 iterator++;
                 if(iterator == config.end()){

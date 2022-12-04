@@ -15,7 +15,7 @@ int main(int argc, char* argv[]) {
     if(argc > 2 && !strcmp(argv[1],"-c")){
         std::vector<std::string> files;
         for (int i = 2; i < argc; ++i) {
-            files.push_back(std::string(argv[i]));
+            files.emplace_back(argv[i]);
         }
         std::vector<std::string> converters;
         std::vector<std::shared_ptr<Params>> params;
@@ -42,18 +42,18 @@ int main(int argc, char* argv[]) {
             for (auto it = converters.begin(); it != converters.end(); it++) {
                 if (pos == converters.size() - 1) {
                     if (!permutated) {
-                        processor.convert(files[2], files[1], *it, std::move(params[pos]));
+                        processor.convert(files[2], files[1], *it, params[pos]);
                     } else {
-                        processor.convert(permutator ? "tmp2" : "tmp1", files[1], *it, std::move(params[pos]));
+                        processor.convert(permutator ? "tmp2" : "tmp1", files[1], *it, params[pos]);
                     }
                     break;
                 } else {
 
                     if (!permutated) {
-                        processor.convert(files[2], "tmp1", *it, std::move(params[pos]));
+                        processor.convert(files[2], "tmp1", *it, params[pos]);
                         permutated = true;
                     } else {
-                        processor.convert(permutator ? "tmp2" : "tmp1", permutator ? "tmp1" : "tmp2", *it, std::move(params[pos]));
+                        processor.convert(permutator ? "tmp2" : "tmp1", permutator ? "tmp1" : "tmp2", *it, params[pos]);
                         permutator = !permutator;
                     }
                 }
