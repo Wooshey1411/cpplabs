@@ -109,8 +109,8 @@ void DistortionConverter::convert(std::shared_ptr<Params> params, BufferPipeline
                     _extremumPos = buffer->pos + i - 1;
                 }
                     _maxV = static_cast<short>(round(abs(buffer->buffer[_extremumPos]) * coeff));
-                    unsigned int inPos = _extremumPos;
-                    unsigned int fiPos = _extremumPos;
+                    unsigned long long inPos = _extremumPos;
+                    unsigned long long fiPos = _extremumPos;
                     buffer->buffer[_extremumPos] = _maxV;
                     bool leftDone=false;
                     bool rightDone = false;

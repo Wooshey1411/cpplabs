@@ -39,5 +39,5 @@ public:
 private:
     short _maxV;
     bool _isFinished;
-    unsigned int _extremumPos;
+    unsigned long long _extremumPos;
 };
