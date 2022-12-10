@@ -2,8 +2,10 @@
 #include <fstream>
 #include "Params/Params.h"
 #include "Exceptions.h"
+#include <variant>
 
-ConfigParser::ConfigParser(std::string  path):_path(std::move(path)) {}
+
+ConfigParser::ConfigParser(const std::string& path):_path(path) {}
 
 void ConfigParser::parse(std::vector<std::string> &config) {
     std::ifstream in;
@@ -12,10 +14,7 @@ void ConfigParser::parse(std::vector<std::string> &config) {
         throw NoConfigException();
     }
 
-    while(true) {
-        if(in.eof()){
-            break;
-        }
+    while(!in.eof()) {
         std::string str;
         in >> str;
         if(str[0] == '#'){

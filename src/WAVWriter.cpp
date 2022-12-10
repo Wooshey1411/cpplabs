@@ -26,4 +26,7 @@ void WAVWriter::writeByFrequency(BufferPipeline* bufferPipeline) {
         _out.write(reinterpret_cast<char*>(&bufferPipeline->buffer[bufferPipeline->pos]),sizeof(uint16_t)*(bufferPipeline->endPos-bufferPipeline->pos));
     }
     bufferPipeline->pos+=bufferPipeline->frequency;
+    if(bufferPipeline->pos >= LENGTH_OF_BUFFER){
+        bufferPipeline->pos = 0;
+    }
 }

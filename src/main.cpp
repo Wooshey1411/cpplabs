@@ -24,11 +24,10 @@ int main(int argc, char* argv[]) {
         try {
             configParser.parse(config);
             getParamsAndConverters(files,config,params,converters);
-        } catch(BadConfigException& e) {
+        } catch(const BadConfigException& e) {
             std::cerr << e.what() << "\n";
             return BAD_CONFIG;
-        }
-        catch(NoConfigException& e){
+        }catch(const NoConfigException& e){
             std::cerr << e.what() << "\n";
             return NO_CONFIG_FILE;
         }
@@ -60,11 +59,10 @@ int main(int argc, char* argv[]) {
                 pos++;
             }
         }
-        catch (NoFileException& e){
+        catch (const NoFileException& e){
             std::cerr << e.what();
             return NO_INPUT_FILE;
-        }
-        catch (BadHeaderException& e){
+        }catch (const BadHeaderException& e){
             std::cerr << e.what();
             return BAD_HEADER;
         }
@@ -77,7 +75,10 @@ int main(int argc, char* argv[]) {
             remove("tmp1");
             remove("tmp2");
         }
+        std::cout << "\nConverted successfully\n";
+    } else{
+        std::cout << "Wrong arguments";
     }
-    std::cout << "\nConverted successfully\n";
+
     return 0;
 }

@@ -68,7 +68,7 @@ unsigned int getValue(const std::string& str, bool skip){
     return value;
 }
 
-void getParamsAndConverters(std::vector<std::string> files, std::vector<std::string> config, std::vector<std::shared_ptr<Params>> &params, std::vector<std::string> &converters){
+void getParamsAndConverters(std::vector<std::string> &files, std::vector<std::string> &config, std::vector<std::shared_ptr<Params>> &params, std::vector<std::string> &converters){
     auto iterator = config.begin();
     while(true){
         if(iterator == config.end()){

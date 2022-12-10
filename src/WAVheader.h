@@ -1,7 +1,10 @@
 #pragma once
 #include <cstdint>
+inline const uint32_t DEFAULT_FREQUENCY = 44100;
+inline const uint16_t COUNT_OF_BITS_IN_BYTE = 8;
 inline const unsigned char align = 4;
-typedef struct WAV_HEADER_MAIN{
+
+struct HeaderMain{
     char RIFF[align]; // RIFF header
     uint32_t chunkSize; // RIFF chunk size
     char WAVE[align]; // WAVE header
@@ -13,16 +16,16 @@ typedef struct WAV_HEADER_MAIN{
     uint32_t bytesPerSec; // bytes per second (byte rate)
     uint16_t blockAlign; // 2 - 16-bit mono, 4 - 16-bit stereo
     uint16_t bitsPerSample; // count of bits per sample;
-} HeaderMain;
+};
 
-typedef struct LIST_HEADER{
+struct ListHeader{
     char LIST[align]; // LIST header;
     uint32_t listSize; // count of bytes in LIST
     unsigned char* list; // list data
-} ListHeader;
+} ;
 
 typedef struct WAV_HEADER{
-    WAV_HEADER_MAIN headerMain;
+    HeaderMain headerMain;
     ListHeader listHeader;
     bool listExist;
     char DATA[align]; // DATA header;

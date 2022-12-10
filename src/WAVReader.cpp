@@ -22,8 +22,8 @@ void WAVReader::readHeader() {
         throw BadHeaderException();
     }
 
-    if(_wavHeader.headerMain.subChunk1Size != sizeof(uint16_t)*8 || _wavHeader.headerMain.audioFormat != 1
-    || _wavHeader.headerMain.samplesPerSec != 44100 || _wavHeader.headerMain.countOfChannels != 1 || _wavHeader.headerMain.blockAlign != 2){
+    if(_wavHeader.headerMain.subChunk1Size != sizeof(uint16_t)*COUNT_OF_BITS_IN_BYTE || _wavHeader.headerMain.audioFormat != 1
+    || _wavHeader.headerMain.samplesPerSec != DEFAULT_FREQUENCY || _wavHeader.headerMain.countOfChannels != 1 || _wavHeader.headerMain.blockAlign != 2){
         throw BadHeaderException("unsupportable format");
     }
 
@@ -59,14 +59,6 @@ void WAVReader::readHeader() {
     }
     _in.read(reinterpret_cast<char*>(&_wavHeader.subChunk2Size),sizeof(uint32_t));
 
-}
-
-void WAVReader::setHeaderToStereo(uint32_t subchunk2size) {
-    _wavHeader.headerMain.countOfChannels = 2;
-    _wavHeader.headerMain.bytesPerSec*=2;
-    _wavHeader.headerMain.blockAlign*=2;
-    _wavHeader.subChunk2Size+=subchunk2size;
-    _wavHeader.headerMain.chunkSize+=subchunk2size;
 }
 
 void WAVReader::printHeader() {

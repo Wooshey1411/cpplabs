@@ -108,47 +108,47 @@ void DistortionConverter::convert(std::shared_ptr<Params> params, BufferPipeline
                 if(_isFinished) {
                     _extremumPos = buffer->pos + i - 1;
                 }
-                    _maxV = static_cast<short>(round(abs(buffer->buffer[_extremumPos]) * coeff));
-                    unsigned long long inPos = _extremumPos;
-                    unsigned long long fiPos = _extremumPos;
-                    buffer->buffer[_extremumPos] = _maxV;
-                    bool leftDone=false;
-                    bool rightDone = false;
-                    while(true){
-                        _isFinished = false;
-                        if(inPos > 1 && abs(buffer->buffer[inPos-1]) > _maxV && !leftDone && abs(buffer->buffer[inPos-1]) > abs(buffer->buffer[inPos-2])
-                        && sign(buffer->buffer[inPos]) == sign(buffer->buffer[inPos-1])) {
+                _maxV = static_cast<short>(round(abs(buffer->buffer[_extremumPos]) * coeff));
+                unsigned long long inPos = _extremumPos;
+                unsigned long long fiPos = _extremumPos;
+                buffer->buffer[_extremumPos] = _maxV;
+                bool leftDone=false;
+                bool rightDone = false;
+                while(true){
+                    _isFinished = false;
+                    if(inPos > 1 && abs(buffer->buffer[inPos-1]) > _maxV && !leftDone && abs(buffer->buffer[inPos-1]) > abs(buffer->buffer[inPos-2])
+                       && sign(buffer->buffer[inPos]) == sign(buffer->buffer[inPos-1])) {
 
-                            if(buffer->buffer[inPos-1] < 0) {
-                                buffer->buffer[inPos - 1] = static_cast<short>(-_maxV);
-                            } else {
-                                buffer->buffer[inPos - 1] = static_cast<short>(_maxV);
-                            }
-                            inPos--;
-                        } else{
-                            leftDone = true;
+                        if(buffer->buffer[inPos-1] < 0) {
+                            buffer->buffer[inPos - 1] = static_cast<short>(-_maxV);
+                        } else {
+                            buffer->buffer[inPos - 1] = static_cast<short>(_maxV);
                         }
-
-                        if(fiPos < LENGTH_OF_BUFFER-1 && fiPos < (buffer->pos+buffer->frequency) && abs(buffer->buffer[fiPos+1]) >= _maxV && !rightDone
-                        && abs(buffer->buffer[fiPos+1]) > abs(buffer->buffer[fiPos+2]) && sign(buffer->buffer[fiPos]) == sign(buffer->buffer[fiPos+1])){
-                            if(buffer->buffer[fiPos+1] < 0) {
-                                buffer->buffer[fiPos + 1] = static_cast<short>(-_maxV);
-                            }
-                            else{
-                                buffer->buffer[fiPos + 1] = static_cast<short>(_maxV);
-                            }
-                            fiPos++;
-                        } else{
-                            rightDone = true;
-                        }
-
-                        if(leftDone && rightDone) {
-                            if(fiPos < buffer->pos+buffer->frequency) {
-                                _isFinished = true;
-                            }
-                            break;
-                        }
+                        inPos--;
+                    } else{
+                        leftDone = true;
                     }
+
+                    if(fiPos < LENGTH_OF_BUFFER-1 && fiPos < (buffer->pos+buffer->frequency) && abs(buffer->buffer[fiPos+1]) >= _maxV && !rightDone
+                       && abs(buffer->buffer[fiPos+1]) > abs(buffer->buffer[fiPos+2]) && sign(buffer->buffer[fiPos]) == sign(buffer->buffer[fiPos+1])){
+                        if(buffer->buffer[fiPos+1] < 0) {
+                            buffer->buffer[fiPos + 1] = static_cast<short>(-_maxV);
+                        }
+                        else{
+                            buffer->buffer[fiPos + 1] = static_cast<short>(_maxV);
+                        }
+                        fiPos++;
+                    } else{
+                        rightDone = true;
+                    }
+
+                    if(leftDone && rightDone) {
+                        if(fiPos < buffer->pos+buffer->frequency) {
+                            _isFinished = true;
+                        }
+                        break;
+                    }
+                }
             }
         }
     }

@@ -12,7 +12,6 @@ public:
     void readHeader();
     void printHeader();
     const Header* getHeader();
-    void setHeaderToStereo(uint32_t subchunk2size);
     bool readByFrequency(BufferPipeline*);
     bool readFullBuffer(BufferPipeline*);
     ~WAVReader();
