@@ -18,7 +18,7 @@ else()
     add_compile_options(-Wall -Wextra -pedantic -Werror)
 endif()
 
-add_library(corelib OBJECT src/WAVReader.cpp src/WAVWriter.cpp src/BufferPipeline.cpp src/Processor.cpp  src/Converters/ConvertersFactory.cpp src/Converters/Converters.cpp src/ConfigParser.cpp src/Params/Params.cpp src/MainUtils.cpp src/Converters/StreamLinker.cpp)
+add_library(corelib OBJECT src/WAVReader.cpp src/WAVWriter.cpp src/BufferPipeline.cpp src/Processor.cpp  src/Converters/ConvertersFactory.cpp src/Converters/Converters.cpp src/ConfigParser.cpp src/MainUtils.cpp src/Converters/StreamLinker.cpp)
 
 add_executable(${exe_name} src/main.cpp)
 target_link_libraries(${exe_name} corelib)

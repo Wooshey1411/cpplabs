@@ -18,12 +18,10 @@ int main(int argc, char* argv[]) {
             files.emplace_back(argv[i]);
         }
         std::vector<std::string> converters;
-        std::vector<std::shared_ptr<Params>> params;
-        std::vector<std::string> config;
+        std::vector<std::variant<std::string,unsigned int>> args;
         ConfigParser configParser(files[0]);
         try {
-            configParser.parse(config);
-            getParamsAndConverters(files,config,params,converters);
+            configParser.parse(args);
         } catch(const BadConfigException& e) {
             std::cerr << e.what() << "\n";
             return BAD_CONFIG;
@@ -35,28 +33,26 @@ int main(int argc, char* argv[]) {
         Processor processor;
         bool permutator = false;
 
-        unsigned int pos = 0;
         bool permutated = false;
         try {
-            for (auto it = converters.begin(); it != converters.end(); it++) {
-                if (pos == converters.size() - 1) {
-                    if (!permutated) {
-                        processor.convert(files[2], files[1], *it, params[pos]);
+            while(args.begin() != args.end()) {
+                    if (args.size() <= 4) {
+                        if (!permutated) {
+                            processor.convert(files[2], files[1], args);
+                        } else {
+                            processor.convert(permutator ? "tmp2" : "tmp1", files[1], args);
+                        }
+                        break;
                     } else {
-                        processor.convert(permutator ? "tmp2" : "tmp1", files[1], *it, params[pos]);
-                    }
-                    break;
-                } else {
 
-                    if (!permutated) {
-                        processor.convert(files[2], "tmp1", *it, params[pos]);
-                        permutated = true;
-                    } else {
-                        processor.convert(permutator ? "tmp2" : "tmp1", permutator ? "tmp1" : "tmp2", *it, params[pos]);
-                        permutator = !permutator;
+                        if (!permutated) {
+                            processor.convert(files[2], "tmp1", args);
+                            permutated = true;
+                        } else {
+                            processor.convert(permutator ? "tmp2" : "tmp1", permutator ? "tmp1" : "tmp2", args);
+                            permutator = !permutator;
+                        }
                     }
-                }
-                pos++;
             }
         }
         catch (const NoFileException& e){

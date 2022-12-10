@@ -5,9 +5,11 @@
 inline const unsigned short BASS_BOOSTED_VOLUME = 1000;
 inline const unsigned short BASS_BOOSTED_VOLUME_COEFFICIENT = 16;
 
-void MuteConverter::convert(std::shared_ptr<Params> params, BufferPipeline* buffer) {
-    auto initial = std::any_cast<unsigned int>(params->getParams(1));
-    auto final = std::any_cast<unsigned int>(params->getParams(2));
+unsigned int MuteConverter::getCountOfParams() {return 2;} // initial,final
+
+void MuteConverter::convert(std::vector<std::variant<std::string,unsigned int>> &params,BufferPipeline* buffer) {
+    auto initial = std::get<unsigned int>(params[0]);;
+    auto final = std::get<unsigned int>(params[1]);;
     if(buffer->currSec >= initial && buffer->currSec <= final){
         for (unsigned int i = 0; i < buffer->frequency; ++i) {
             buffer->buffer[buffer->pos+i] = 0;
@@ -22,9 +24,11 @@ void MuteConverter::printDescription(){
 
 MixConverter::MixConverter():_isInitialized(false),_isFinished(false) {}
 
-void MixConverter::convert(std::shared_ptr<Params> params, BufferPipeline *buffer) {
-    auto path = std::any_cast<std::string>(params->getParams(1));
-    auto initial = std::any_cast<unsigned int>(params->getParams(2));
+unsigned int MixConverter::getCountOfParams() {return 2;} // initial, number of stream
+
+void MixConverter::convert(std::vector<std::variant<std::string,unsigned int>> &params,BufferPipeline* buffer) {
+    auto path = std::get<std::string>(params[0]);
+    auto initial = std::get<unsigned int>(params[1]);
 
     if(!_isInitialized){
         _streamLinker = new StreamLinker(path);
@@ -64,9 +68,10 @@ void MixConverter::printDescription(){
     std::cout << std::setw(15) << std::cout.fill() << "from INITIAL_SECOND to end of file\n\n";
 }
 
-void BassBoostedConverter::convert(std::shared_ptr<Params> params, BufferPipeline *buffer) {
-    auto initial = std::any_cast<unsigned int>(params->getParams(1));
-    auto final = std::any_cast<unsigned int>(params->getParams(2));
+unsigned int BassBoostedConverter::getCountOfParams() {return 2;} // initial,final
+void BassBoostedConverter::convert(std::vector<std::variant<std::string,unsigned int>> &params,BufferPipeline* buffer) {
+    auto initial = std::get<unsigned int>(params[0]);
+    auto final = std::get<unsigned int>(params[1]);
     if(buffer->currSec >= initial && buffer->currSec <= final){
         for (unsigned int i = 0; i < buffer->frequency; ++i) {
             if(buffer->buffer[buffer->pos+i] > BASS_BOOSTED_VOLUME){
@@ -85,6 +90,8 @@ void BassBoostedConverter::printDescription(){
     std::cout << std::setw(15) << std::cout.fill() << "make bass boosted effect from INITIAL_SECOND to FINAL_SECOND\n\n";
 }
 
+unsigned int DistortionConverter::getCountOfParams() { return 3;} // initial,final,coefficient
+
 DistortionConverter::DistortionConverter():_maxV(0),_isFinished(true),_extremumPos(0) {}
 
 bool sign (int num){
@@ -96,10 +103,10 @@ bool sign (int num){
     }
 }
 
-void DistortionConverter::convert(std::shared_ptr<Params> params, BufferPipeline* buffer) {
-    auto initial = std::any_cast<unsigned int>(params->getParams(1));
-    auto final = std::any_cast<unsigned int>(params->getParams(2));
-    auto coefficient = std::any_cast<unsigned int>(params->getParams(3));
+void DistortionConverter::convert(std::vector<std::variant<std::string,unsigned int>> &params,BufferPipeline* buffer) {
+    auto initial = std::get<unsigned int>(params[0]);
+    auto final = std::get<unsigned int>(params[1]);
+    auto coefficient = std::get<unsigned int>(params[2]);
 
     if(buffer->currSec >= initial && buffer->currSec <= final){
         double coeff = 1.0-coefficient*1.0/100;

@@ -1,11 +1,13 @@
 #pragma once
 #include "../BufferPipeline.h"
-#include "../Params/Params.h"
 #include <memory>
+#include <variant>
+#include <vector>
 
 class Converter{
 public:
-    virtual void convert( std::shared_ptr<Params> params,BufferPipeline*) = 0;
+    virtual unsigned int getCountOfParams() = 0;
+    virtual void convert(std::vector<std::variant<std::string,unsigned int>> &params,BufferPipeline*) = 0;
     virtual void printDescription() = 0;
     virtual ~Converter() = default;
 };

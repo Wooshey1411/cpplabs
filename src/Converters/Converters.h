@@ -5,7 +5,8 @@
 
 class MuteConverter : public Converter{
 public:
-    void convert(std::shared_ptr<Params> params, BufferPipeline* buffer) override;
+    void convert(std::vector<std::variant<std::string,unsigned int>> &params,BufferPipeline*) override;
+    unsigned int getCountOfParams() override;
     void printDescription() override;
     ~MuteConverter() override = default;
 };
@@ -13,7 +14,8 @@ public:
 class MixConverter : public Converter{
 public:
     MixConverter();
-    void convert(std::shared_ptr<Params> params, BufferPipeline* buffer) override;
+    void convert(std::vector<std::variant<std::string,unsigned int>> &params,BufferPipeline*) override;
+    unsigned int getCountOfParams() override;
     void printDescription() override;
     ~MixConverter() override = default;
 private:
@@ -25,7 +27,8 @@ private:
 
 class BassBoostedConverter : public Converter{
 public:
-    void convert(std::shared_ptr<Params> params, BufferPipeline* buffer) override;
+    void convert(std::vector<std::variant<std::string,unsigned int>> &params,BufferPipeline*) override;
+    unsigned int getCountOfParams() override;
     void printDescription() override;
     ~BassBoostedConverter() override = default;
 };
@@ -33,7 +36,8 @@ public:
 class DistortionConverter : public Converter{
 public:
     DistortionConverter();
-    void convert(std::shared_ptr<Params> params, BufferPipeline* buffer) override;
+    void convert(std::vector<std::variant<std::string,unsigned int>> &params,BufferPipeline*) override;
+    unsigned int getCountOfParams() override;
     void printDescription() override;
     ~DistortionConverter() override = default;
 private:

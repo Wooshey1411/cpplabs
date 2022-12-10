@@ -1,11 +1,13 @@
 #pragma once
 #include <iostream>
 #include <memory>
-#include "Params/Params.h"
+#include <variant>
+#include <vector>
+
 class Processor {
 public:
     Processor() = default;
-    void convert(std::string_view in, std::string_view out, std::string_view name, const std::shared_ptr<Params>& params);
+    void convert(std::string_view in, std::string_view out, std::vector<std::variant<std::string,unsigned int>> &args);
     ~Processor() = default;
 };
 
