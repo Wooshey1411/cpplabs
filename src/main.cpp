@@ -18,6 +18,7 @@ int main(int argc, char* argv[]) {
             files.emplace_back(argv[i]);
         }
         ConfigParser configParser(files[0]);
+        files.erase(files.begin());
         std::vector<std::variant<std::string, unsigned int>> params;
         try {
             configParser.parse(params);
