@@ -18,9 +18,9 @@ std::unique_ptr<Converter> ConvertersFactory::createConverter(std::string_view n
 
     auto it = _converters.find(std::string(name));
     if(it != _converters.end()){
-        return std::move(it->second());
+        return (it->second());
     }
-    throw std::runtime_error("Fabric: Converter with such name doesn't exist");
+    throw BadConfigException("Converter with such name doesn't exist");
 }
 
 void ConvertersFactory::printDescriptions() {

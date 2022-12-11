@@ -9,8 +9,9 @@ unsigned int MuteConverter::getCountOfParams() {return 2;} // initial,final
 
 void MuteConverter::convert(std::vector<std::variant<std::string,unsigned int>> &params,std::vector<std::unique_ptr<Reader>> &streams,Writer &out, uint32_t frequency) {
     if(params.size() < getCountOfParams()){
-        throw BadConfigException("Wrong config");
+        throw BadConfigException("Wrong count of params");
     }
+
     auto initial = std::get<unsigned int>(params[0]);
     auto final = std::get<unsigned int>(params[1]);
     BufferPipeline inBuff;
@@ -48,7 +49,7 @@ unsigned int MixConverter::getCountOfParams() {return 2;} // initial, number of 
 
 void MixConverter::convert(std::vector<std::variant<std::string,unsigned int>> &params,std::vector<std::unique_ptr<Reader>> &streams,Writer &out, uint32_t frequency) {
     if(params.size() < getCountOfParams()){
-        throw BadConfigException("Wrong config");
+        throw BadConfigException("Wrong count of params");
     }
     auto stream = std::get<unsigned int>(params[0]);
     auto initial = std::get<unsigned int>(params[1]);
@@ -115,7 +116,7 @@ unsigned int BassBoostedConverter::getCountOfParams() {return 2;} // initial,fin
 
 void BassBoostedConverter::convert(std::vector<std::variant<std::string,unsigned int>> &params,std::vector<std::unique_ptr<Reader>> &streams,Writer &out, uint32_t frequency) {
     if(params.size() < getCountOfParams()){
-        throw BadConfigException("Wrong config");
+        throw BadConfigException("Wrong count of params");
     }
     auto initial = std::get<unsigned int>(params[0]);
     auto final = std::get<unsigned int>(params[1]);
@@ -169,7 +170,7 @@ bool sign (int num){
 
 void DistortionConverter::convert(std::vector<std::variant<std::string,unsigned int>> &params,std::vector<std::unique_ptr<Reader>> &streams,Writer &out, uint32_t frequency) {
     if(params.size() < 3){
-        throw BadConfigException("Wrong config");
+        throw BadConfigException("Wrong count of params");
     }
     auto initial = std::get<unsigned int>(params[0]);
     auto final = std::get<unsigned int>(params[1]);
