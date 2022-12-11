@@ -1,11 +1,11 @@
 #pragma once
 #include "Converter.h"
-#include "../WAVReader.h"
+#include "../Reader/WAVReader.h"
 #include "StreamLinker.h"
 
 class MuteConverter : public Converter{
 public:
-    void convert(std::vector<std::variant<std::string,unsigned int>> &params,BufferPipeline*) override;
+    void convert(std::vector<std::variant<std::string,unsigned int>> &params,std::vector<std::unique_ptr<Reader>> &streams,Writer out, uint32_t frequency) override;
     unsigned int getCountOfParams() override;
     void printDescription() override;
     ~MuteConverter() override = default;
@@ -14,7 +14,7 @@ public:
 class MixConverter : public Converter{
 public:
     MixConverter();
-    void convert(std::vector<std::variant<std::string,unsigned int>> &params,BufferPipeline*) override;
+    void convert(std::vector<std::variant<std::string,unsigned int>> &params,std::vector<std::unique_ptr<Reader>> &streams,Writer out, uint32_t frequency) override;
     unsigned int getCountOfParams() override;
     void printDescription() override;
     ~MixConverter() override = default;
@@ -27,7 +27,7 @@ private:
 
 class BassBoostedConverter : public Converter{
 public:
-    void convert(std::vector<std::variant<std::string,unsigned int>> &params,BufferPipeline*) override;
+    void convert(std::vector<std::variant<std::string,unsigned int>> &params,std::vector<std::unique_ptr<Reader>> &streams,Writer out, uint32_t frequency) override;
     unsigned int getCountOfParams() override;
     void printDescription() override;
     ~BassBoostedConverter() override = default;
@@ -36,7 +36,7 @@ public:
 class DistortionConverter : public Converter{
 public:
     DistortionConverter();
-    void convert(std::vector<std::variant<std::string,unsigned int>> &params,BufferPipeline*) override;
+    void convert(std::vector<std::variant<std::string,unsigned int>> &params,std::vector<std::unique_ptr<Reader>> &streams,Writer out, uint32_t frequency) override;
     unsigned int getCountOfParams() override;
     void printDescription() override;
     ~DistortionConverter() override = default;

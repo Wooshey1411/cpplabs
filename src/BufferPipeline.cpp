@@ -2,7 +2,7 @@
 
 inline const int SHIFT_ALIGN = 44100*3;
 
-BufferPipeline::BufferPipeline():buffer(new short[LENGTH_OF_BUFFER]),pos(0),currSec(0),frequency(0),endPos(0) {}
+BufferPipeline::BufferPipeline():buffer(new short[LENGTH_OF_BUFFER]),pos(0),endPos(0) {}
 BufferPipeline::~BufferPipeline() {
     delete[] buffer;
 }

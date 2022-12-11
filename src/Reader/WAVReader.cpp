@@ -1,11 +1,5 @@
 #include "WAVReader.h"
 
-WAVReader::WAVReader(std::string_view path):_path(path){
-    _in.open(_path, std::fstream::in | std::fstream::binary);
-
-    _wavHeader.listExist = false;
-}
-
 void WAVReader::readHeader() {
     if(!_in.is_open()){
         throw NoFileException();
@@ -109,47 +103,6 @@ void WAVReader::printHeader() {
 
 const Header *WAVReader::getHeader() {
     return &_wavHeader;
-}
-
-bool WAVReader::readByFrequency(BufferPipeline* bufferPipeline) {
-
-    if(bufferPipeline->frequency == 0){
-        bufferPipeline->frequency = _wavHeader.headerMain.samplesPerSec;
-    }else{
-        bufferPipeline->currSec++;
-    }
-
-    if(_in.eof()){
-        return false;
-    }
-    if(bufferPipeline->pos+bufferPipeline->frequency >= LENGTH_OF_BUFFER){
-        bufferPipeline->pos = 0;
-    }
-
-    _in.read(reinterpret_cast<char*>(&bufferPipeline->buffer[bufferPipeline->pos]),sizeof(uint16_t)*bufferPipeline->frequency);
-    unsigned long long readed = _in.gcount() / sizeof(uint16_t);
-
-   if(_in.eof()){
-       bufferPipeline->endPos = bufferPipeline->pos + readed;
-   }
-    return true;
-}
-
-bool WAVReader::readFullBuffer(BufferPipeline* bufferPipeline) {
-    if(bufferPipeline->frequency == 0) {
-        bufferPipeline->frequency = _wavHeader.headerMain.samplesPerSec;
-    }
-
-    if(_in.eof()){
-        return false;
-    }
-
-    _in.read(reinterpret_cast<char*>(&bufferPipeline->buffer[bufferPipeline->pos]),sizeof(uint16_t)*(LENGTH_OF_BUFFER-bufferPipeline->pos));
-    unsigned long long readed = _in.gcount() / sizeof(uint16_t);
-    if (readed != LENGTH_OF_BUFFER-bufferPipeline->pos){
-        bufferPipeline->endPos = bufferPipeline->pos + readed;
-    }
-    return true;
 }
 
 WAVReader::~WAVReader() {

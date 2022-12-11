@@ -1,8 +1,9 @@
 #include "WAVWriter.h"
 
-WAVWriter::WAVWriter(std::string_view path):_path(path) {
+/*WAVWriter::WAVWriter(std::string_view unnamed, std::string_view path) : Writer(unnamed) {
+    _path = path;
     _out.open(_path,std::fstream::out | std::fstream::binary);
-}
+}*/
 
 
 void WAVWriter::writeHeader(const Header* wavHeader) {
@@ -16,17 +17,4 @@ void WAVWriter::writeHeader(const Header* wavHeader) {
     }
     _out.write(reinterpret_cast<char*>(&h.DATA[0]),align);
     _out.write(reinterpret_cast<char*>(&h.subChunk2Size),sizeof(uint32_t));
-}
-
-void WAVWriter::writeByFrequency(BufferPipeline* bufferPipeline) {
-    if(bufferPipeline->endPos == 0) {
-       _out.write(reinterpret_cast<char*>(&bufferPipeline->buffer[bufferPipeline->pos]),sizeof(uint16_t)*bufferPipeline->frequency);
-    }
-    else{
-        _out.write(reinterpret_cast<char*>(&bufferPipeline->buffer[bufferPipeline->pos]),sizeof(uint16_t)*(bufferPipeline->endPos-bufferPipeline->pos));
-    }
-    bufferPipeline->pos+=bufferPipeline->frequency;
-    if(bufferPipeline->pos >= LENGTH_OF_BUFFER){
-        bufferPipeline->pos = 0;
-    }
 }

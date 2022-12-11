@@ -1,12 +1,12 @@
 #pragma once
 #include "../BufferPipeline.h"
 #include <iostream>
-#include "../WAVReader.h"
+#include "../Reader/WAVReader.h"
 
 class StreamLinker {
 public:
     StreamLinker(const std::string&);
-    void fillBuffer(BufferPipeline*);
+   // void fillBuffer(BufferPipeline*);
     ~StreamLinker() = default;
 private:
     WAVReader* _reader;

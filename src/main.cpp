@@ -7,16 +7,11 @@
 #include "MainUtils.h"
 
 int main(int argc, char* argv[]) {
-    if(!strcmp(argv[1],"-h") && argc == 2){
-        printHelp();
-        return 0;
-    }
 
-    if(argc > 2 && !strcmp(argv[1],"-c")){
         std::vector<std::string> files;
-        for (int i = 2; i < argc; ++i) {
-            files.emplace_back(argv[i]);
-        }
+        files.push_back("C:\\aboba\\config.txt");
+    files.push_back("C:\\aboba\\out.wav");
+    files.push_back("C:\\aboba\\lesnik.wav");
         std::vector<std::string> converters;
         std::vector<std::variant<std::string,unsigned int>> args;
         ConfigParser configParser(files[0]);
@@ -72,9 +67,6 @@ int main(int argc, char* argv[]) {
             remove("tmp2");
         }
         std::cout << "\nConverted successfully\n";
-    } else{
-        std::cout << "Wrong arguments";
-    }
 
     return 0;
 }

@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "../WAVReader.h"
+#include "../Reader/WAVReader.h"
 #include "../ConfigParser.h"
 #include "../MainUtils.h"
 #include "../Params/Params.h"
@@ -7,34 +7,34 @@
 
 namespace{
     TEST(WAVReaderTEST,HeaderCorrect){
-        WAVReader wavReader("../src/tests/testFiles/headerWithoutLIST");
+        WAVReader wavReader(std::string_view(), "../src/tests/testFiles/headerWithoutLIST");
         wavReader.readHeader();
     }
 
     TEST(WAVReaderTEST,HeaderWithLIST){
-        WAVReader wavReader("../src/tests/testFiles/headerWithLIST");
+        WAVReader wavReader(std::string_view(), "../src/tests/testFiles/headerWithLIST");
         wavReader.readHeader();
     }
 
     TEST(WAVReaderTEST,CorruptedHeader){
-       WAVReader wavReader("../src/tests/testFiles/corruptedHeader");
+       WAVReader wavReader(std::string_view(), "../src/tests/testFiles/corruptedHeader");
        EXPECT_ANY_THROW(wavReader.readHeader());
     }
 
     TEST(WAVReaderTEST,unsupportableFormatHeaderSubChunk1Size){
-        WAVReader wavReader("../src/tests/testFiles/unsupportableFormatHeaderSubChunk1Size");
+        WAVReader wavReader(std::string_view(), "../src/tests/testFiles/unsupportableFormatHeaderSubChunk1Size");
         EXPECT_ANY_THROW(wavReader.readHeader());
     }
     TEST(WAVReaderTEST,unsupportableFormatHeaderFormat){
-        WAVReader wavReader("../src/tests/testFiles/unsupportableFormatHeaderFormat");
+        WAVReader wavReader(std::string_view(), "../src/tests/testFiles/unsupportableFormatHeaderFormat");
         EXPECT_ANY_THROW(wavReader.readHeader());
     }
     TEST(WAVReaderTEST,unsupportableFormatHeaderBlockAlign){
-        WAVReader wavReader("../src/tests/testFiles/unsupportableFormatHeaderBlockAlign");
+        WAVReader wavReader(std::string_view(), "../src/tests/testFiles/unsupportableFormatHeaderBlockAlign");
         EXPECT_ANY_THROW(wavReader.readHeader());
     }
     TEST(WAVReaderTEST,UnsupportableFormatNumOfChannels){
-        WAVReader wavReader("../src/tests/testFiles/unsupportableFormatNumOfChannels");
+        WAVReader wavReader(std::string_view(), "../src/tests/testFiles/unsupportableFormatNumOfChannels");
         EXPECT_ANY_THROW(wavReader.readHeader());
     }
 

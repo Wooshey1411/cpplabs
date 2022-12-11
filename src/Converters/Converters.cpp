@@ -7,12 +7,29 @@ inline const unsigned short BASS_BOOSTED_VOLUME_COEFFICIENT = 16;
 
 unsigned int MuteConverter::getCountOfParams() {return 2;} // initial,final
 
-void MuteConverter::convert(std::vector<std::variant<std::string,unsigned int>> &params,BufferPipeline* buffer) {
-    auto initial = std::get<unsigned int>(params[0]);;
-    auto final = std::get<unsigned int>(params[1]);;
-    if(buffer->currSec >= initial && buffer->currSec <= final){
-        for (unsigned int i = 0; i < buffer->frequency; ++i) {
-            buffer->buffer[buffer->pos+i] = 0;
+void MuteConverter::convert(std::vector<std::variant<std::string,unsigned int>> &params,std::vector<std::unique_ptr<Reader>> &streams,Writer out, uint32_t frequency) {
+    auto initial = std::get<unsigned int>(params[0]);
+    auto final = std::get<unsigned int>(params[1]);
+    BufferPipeline inBuff;
+    BufferPipeline outBuff;
+    unsigned int seconds = 0;
+
+    while(streams[0]->read(inBuff,frequency)) {
+        if (seconds >= initial && seconds <= final) {
+            for (unsigned int i = 0; i < frequency; ++i) {
+                outBuff.buffer[outBuff.pos + i] = 0;
+            }
+        }else{
+            for (unsigned int i = 0; i < frequency; ++i) {
+                outBuff.buffer[outBuff.pos + i] = inBuff.buffer[inBuff.pos+i];
+            }
+        }
+        seconds++;
+
+        if(inBuff.endPos == 0) {
+            out.write(outBuff, frequency);
+        } else{
+            out.write(outBuff,inBuff.endPos-inBuff.pos);
         }
     }
 }
@@ -26,8 +43,8 @@ MixConverter::MixConverter():_isInitialized(false),_isFinished(false) {}
 
 unsigned int MixConverter::getCountOfParams() {return 2;} // initial, number of stream
 
-void MixConverter::convert(std::vector<std::variant<std::string,unsigned int>> &params,BufferPipeline* buffer) {
-    auto path = std::get<std::string>(params[0]);
+void MixConverter::convert(std::vector<std::variant<std::string,unsigned int>> &params,std::vector<std::unique_ptr<Reader>> &streams,Writer out, uint32_t frequency) {
+   /* auto path = std::get<std::string>(params[0]);
     auto initial = std::get<unsigned int>(params[1]);
 
     if(!_isInitialized){
@@ -59,7 +76,7 @@ void MixConverter::convert(std::vector<std::variant<std::string,unsigned int>> &
         } else {
             _bufferPipeline.pos += buffer->frequency;
         }
-    }
+    }*/
 }
 
 void MixConverter::printDescription(){
@@ -69,18 +86,36 @@ void MixConverter::printDescription(){
 }
 
 unsigned int BassBoostedConverter::getCountOfParams() {return 2;} // initial,final
-void BassBoostedConverter::convert(std::vector<std::variant<std::string,unsigned int>> &params,BufferPipeline* buffer) {
+
+void BassBoostedConverter::convert(std::vector<std::variant<std::string,unsigned int>> &params,std::vector<std::unique_ptr<Reader>> &streams,Writer out, uint32_t frequency) {
     auto initial = std::get<unsigned int>(params[0]);
     auto final = std::get<unsigned int>(params[1]);
-    if(buffer->currSec >= initial && buffer->currSec <= final){
-        for (unsigned int i = 0; i < buffer->frequency; ++i) {
-            if(buffer->buffer[buffer->pos+i] > BASS_BOOSTED_VOLUME){
-                buffer->buffer[buffer->pos+i]=BASS_BOOSTED_VOLUME;
+    BufferPipeline inBuff;
+    BufferPipeline outBuff;
+    unsigned int seconds = 0;
+
+    while(streams[0]->read(inBuff,frequency)) {
+
+        if (seconds >= initial && seconds <= final) {
+            for (unsigned int i = 0; i < frequency; ++i) {
+                if (inBuff.buffer[inBuff.pos + i] > BASS_BOOSTED_VOLUME) {
+                    outBuff.buffer[outBuff.pos + i] = BASS_BOOSTED_VOLUME;
+                }
+                if (inBuff.buffer[inBuff.pos + i] < -BASS_BOOSTED_VOLUME) {
+                    outBuff.buffer[outBuff.pos + i] = -BASS_BOOSTED_VOLUME;
+                }
+                outBuff.buffer[outBuff.pos + i] *= BASS_BOOSTED_VOLUME_COEFFICIENT;
             }
-            if(buffer->buffer[buffer->pos+i] < -BASS_BOOSTED_VOLUME){
-                buffer->buffer[buffer->pos+i] = -BASS_BOOSTED_VOLUME;
+        }else{
+            for (unsigned int i = 0; i < frequency; ++i) {
+                outBuff.buffer[outBuff.pos + i] = inBuff.buffer[inBuff.pos+i];
             }
-            buffer->buffer[buffer->pos+i]*=BASS_BOOSTED_VOLUME_COEFFICIENT;
+        }
+        seconds++;
+        if(inBuff.endPos == 0) {
+            out.write(outBuff, frequency);
+        } else{
+            out.write(outBuff,inBuff.endPos-inBuff.pos);
         }
     }
 }
@@ -103,60 +138,76 @@ bool sign (int num){
     }
 }
 
-void DistortionConverter::convert(std::vector<std::variant<std::string,unsigned int>> &params,BufferPipeline* buffer) {
+void DistortionConverter::convert(std::vector<std::variant<std::string,unsigned int>> &params,std::vector<std::unique_ptr<Reader>> &streams,Writer out, uint32_t frequency) {
     auto initial = std::get<unsigned int>(params[0]);
     auto final = std::get<unsigned int>(params[1]);
     auto coefficient = std::get<unsigned int>(params[2]);
 
-    if(buffer->currSec >= initial && buffer->currSec <= final){
+    BufferPipeline inBuff;
+    BufferPipeline outBuff;
+    unsigned int seconds = 0;
+    while(streams[0]->read(inBuff,frequency)){
+        for (unsigned int i = 0; i < frequency; ++i) {
+            outBuff.buffer[outBuff.pos+i] = inBuff.buffer[inBuff.pos+i];
+        }
+    if(seconds >= initial && seconds <= final){
         double coeff = 1.0-coefficient*1.0/100;
-        for (unsigned int i = 1; i < buffer->frequency; ++i) {
-            if(abs(buffer->buffer[buffer->pos+i-1]) > abs(buffer->buffer[buffer->pos+i]) || !_isFinished){
-                if(_isFinished) {
-                    _extremumPos = buffer->pos + i - 1;
+        for (unsigned int i = 1; i < frequency; ++i) {
+            if (abs(outBuff.buffer[outBuff.pos + i - 1]) > abs(outBuff.buffer[outBuff.pos + i]) || !_isFinished) {
+                if (_isFinished) {
+                    _extremumPos = outBuff.pos + i - 1;
                 }
-                _maxV = static_cast<short>(round(abs(buffer->buffer[_extremumPos]) * coeff));
+                _maxV = static_cast<short>(round(abs(outBuff.buffer[_extremumPos]) * coeff));
                 unsigned long long inPos = _extremumPos;
                 unsigned long long fiPos = _extremumPos;
-                buffer->buffer[_extremumPos] = _maxV;
-                bool leftDone=false;
+                outBuff.buffer[_extremumPos] = _maxV;
+                bool leftDone = false;
                 bool rightDone = false;
-                while(true){
+                while (true) {
                     _isFinished = false;
-                    if(inPos > 1 && abs(buffer->buffer[inPos-1]) > _maxV && !leftDone && abs(buffer->buffer[inPos-1]) > abs(buffer->buffer[inPos-2])
-                       && sign(buffer->buffer[inPos]) == sign(buffer->buffer[inPos-1])) {
+                    if (inPos > 1 && abs(outBuff.buffer[inPos - 1]) > _maxV && !leftDone &&
+                        abs(outBuff.buffer[inPos - 1]) > abs(outBuff.buffer[inPos - 2])
+                        && sign(outBuff.buffer[inPos]) == sign(outBuff.buffer[inPos - 1])) {
 
-                        if(buffer->buffer[inPos-1] < 0) {
-                            buffer->buffer[inPos - 1] = static_cast<short>(-_maxV);
+                        if (outBuff.buffer[inPos - 1] < 0) {
+                            outBuff.buffer[inPos - 1] = static_cast<short>(-_maxV);
                         } else {
-                            buffer->buffer[inPos - 1] = static_cast<short>(_maxV);
+                            outBuff.buffer[inPos - 1] = static_cast<short>(_maxV);
                         }
                         inPos--;
-                    } else{
+                    } else {
                         leftDone = true;
                     }
 
-                    if(fiPos < LENGTH_OF_BUFFER-1 && fiPos < (buffer->pos+buffer->frequency) && abs(buffer->buffer[fiPos+1]) >= _maxV && !rightDone
-                       && abs(buffer->buffer[fiPos+1]) > abs(buffer->buffer[fiPos+2]) && sign(buffer->buffer[fiPos]) == sign(buffer->buffer[fiPos+1])){
-                        if(buffer->buffer[fiPos+1] < 0) {
-                            buffer->buffer[fiPos + 1] = static_cast<short>(-_maxV);
-                        }
-                        else{
-                            buffer->buffer[fiPos + 1] = static_cast<short>(_maxV);
+                    if (fiPos < LENGTH_OF_BUFFER - 1 && fiPos < (outBuff.pos + frequency) &&
+                        abs(outBuff.buffer[fiPos + 1]) >= _maxV && !rightDone
+                        && abs(outBuff.buffer[fiPos + 1]) > abs(outBuff.buffer[fiPos + 2]) &&
+                        sign(outBuff.buffer[fiPos]) == sign(outBuff.buffer[fiPos + 1])) {
+                        if (outBuff.buffer[fiPos + 1] < 0) {
+                            outBuff.buffer[fiPos + 1] = static_cast<short>(-_maxV);
+                        } else {
+                            outBuff.buffer[fiPos + 1] = static_cast<short>(_maxV);
                         }
                         fiPos++;
-                    } else{
+                    } else {
                         rightDone = true;
                     }
 
-                    if(leftDone && rightDone) {
-                        if(fiPos < buffer->pos+buffer->frequency) {
+                    if (leftDone && rightDone) {
+                        if (fiPos < outBuff.pos + frequency) {
                             _isFinished = true;
                         }
                         break;
                     }
                 }
             }
+        }
+    }
+        seconds++;
+        if(inBuff.endPos == 0) {
+            out.write(outBuff, frequency);
+        } else{
+            out.write(outBuff,inBuff.endPos-inBuff.pos);
         }
     }
 }

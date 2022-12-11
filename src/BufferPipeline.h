@@ -7,8 +7,6 @@ class BufferPipeline{
 public:
     short* buffer;
     unsigned long long pos;
-    unsigned int currSec;
-    unsigned int frequency;
     unsigned long long endPos;
     void shiftToBegin();
     BufferPipeline();
