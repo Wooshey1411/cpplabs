@@ -1,5 +1,5 @@
 #pragma once
-#include "../WAVheader.h"
+#include "../WAVFormat.h"
 #include "../Exceptions.h"
 #include "Reader.h"
 
@@ -9,11 +9,8 @@ public:
     void readHeader();
     void printHeader();
     const Header* getHeader();
-   // bool readByFrequency(BufferPipeline*);
-  //  bool readFullBuffer(BufferPipeline*);
     ~WAVReader() override;
 private:
-   // std::fstream _in;
-  //  std::string _path;
+   // std::string _path;
     Header _wavHeader;
 };

@@ -20,7 +20,7 @@ else()
 endif()
 ]]
 
-add_library(corelib OBJECT src/Reader/WAVReader.cpp src/Writer/WAVWriter.cpp src/BufferPipeline.cpp src/Processor.cpp  src/Converters/ConvertersFactory.cpp src/Converters/Converters.cpp src/ConfigParser.cpp src/MainUtils.cpp src/Converters/StreamLinker.cpp src/Reader/Reader.cpp src/Reader/Reader.h src/Writer/Writer.cpp src/Writer/Writer.h)
+add_library(corelib OBJECT src/Reader/WAVReader.cpp src/Writer/WAVWriter.cpp src/BufferPipeline.cpp src/Processor.cpp  src/Converters/ConvertersFactory.cpp src/Converters/Converters.cpp src/ConfigParser.cpp src/MainUtils.cpp src/Reader/Reader.cpp src/Reader/Reader.h src/Writer/Writer.cpp src/Writer/Writer.h)
 
 add_executable(${exe_name} src/main.cpp)
 target_link_libraries(${exe_name} corelib)

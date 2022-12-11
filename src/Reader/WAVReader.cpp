@@ -52,7 +52,6 @@ void WAVReader::readHeader() {
         throw BadHeaderException();
     }
     _in.read(reinterpret_cast<char*>(&_wavHeader.subChunk2Size),sizeof(uint32_t));
-
 }
 
 void WAVReader::printHeader() {

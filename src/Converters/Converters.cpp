@@ -7,7 +7,7 @@ inline const unsigned short BASS_BOOSTED_VOLUME_COEFFICIENT = 16;
 
 unsigned int MuteConverter::getCountOfParams() {return 2;} // initial,final
 
-void MuteConverter::convert(std::vector<std::variant<std::string,unsigned int>> &params,std::vector<std::unique_ptr<Reader>> &streams,Writer out, uint32_t frequency) {
+void MuteConverter::convert(std::vector<std::variant<std::string,unsigned int>> &params,std::vector<std::unique_ptr<Reader>> &streams,Writer &out, uint32_t frequency) {
     auto initial = std::get<unsigned int>(params[0]);
     auto final = std::get<unsigned int>(params[1]);
     BufferPipeline inBuff;
@@ -39,44 +39,64 @@ void MuteConverter::printDescription(){
     std::cout << std::setw(15) << std::cout.fill() << "mute audio from INITIAL_SECOND to FINAL_SECOND\n\n";
 }
 
-MixConverter::MixConverter():_isInitialized(false),_isFinished(false) {}
+MixConverter::MixConverter():_isFinished(false) {}
 
 unsigned int MixConverter::getCountOfParams() {return 2;} // initial, number of stream
 
-void MixConverter::convert(std::vector<std::variant<std::string,unsigned int>> &params,std::vector<std::unique_ptr<Reader>> &streams,Writer out, uint32_t frequency) {
-   /* auto path = std::get<std::string>(params[0]);
+void MixConverter::convert(std::vector<std::variant<std::string,unsigned int>> &params,std::vector<std::unique_ptr<Reader>> &streams,Writer &out, uint32_t frequency) {
+    auto stream = std::get<unsigned int>(params[0]);
     auto initial = std::get<unsigned int>(params[1]);
 
-    if(!_isInitialized){
-        _streamLinker = new StreamLinker(path);
-        _streamLinker->fillBuffer(&_bufferPipeline);
-        _isInitialized = true;
+    BufferPipeline inBuff;
+    BufferPipeline outBuff;
+    BufferPipeline secondBuf;
+    unsigned int seconds = 0;
+
+    if(stream >= streams.size()){
+        throw BadConfigException("Wrong number of stream");
     }
 
-    if(buffer->currSec >= initial && !_isFinished){
-        bool isOverflow = false;
-        unsigned int counter = 0;
-        for (unsigned int i = 0; i < buffer->frequency; ++i) {
-            if(_bufferPipeline.endPos != 0 && _bufferPipeline.pos+i == _bufferPipeline.endPos){
-                _isFinished = true;
-                break;
+    streams[stream]->readFullBuffer(secondBuf);
+
+    while(streams[0]->read(inBuff,frequency)) {
+
+        if (seconds >= initial && !_isFinished) {
+            bool isOverflow = false;
+            unsigned int counter = 0;
+            for (unsigned int i = 0; i < frequency; ++i) {
+                if (secondBuf.endPos != 0 && secondBuf.pos + i == secondBuf.endPos) {
+                    _isFinished = true;
+                    break;
+                }
+                if (secondBuf.pos + i == LENGTH_OF_BUFFER) {
+                    isOverflow = true;
+                    secondBuf.pos = 0;
+                    streams[stream]->readFullBuffer(secondBuf);
+                }
+                outBuff.buffer[outBuff.pos + i] = (inBuff.buffer[inBuff.pos + i] / 2 +
+                                                   secondBuf.buffer[secondBuf.pos + i] / 2);
+                if (isOverflow) {
+                    counter++;
+                }
             }
-            if(_bufferPipeline.pos+i == LENGTH_OF_BUFFER){
-                isOverflow = true;
-                _bufferPipeline.pos = 0;
-                _streamLinker->fillBuffer(&_bufferPipeline);
+            if (isOverflow) {
+                secondBuf.pos += counter;
+            } else {
+                secondBuf.pos += frequency;
             }
-            buffer->buffer[buffer->pos+i] = (buffer->buffer[buffer->pos+i]/2 + _bufferPipeline.buffer[_bufferPipeline.pos+i]/2);
-            if(isOverflow){
-                counter++;
+        } else{
+            for (unsigned int i = 0; i < frequency; ++i) {
+                outBuff.buffer[outBuff.pos + i] = inBuff.buffer[inBuff.pos+i];
             }
         }
-        if(isOverflow){
-            _bufferPipeline.pos += counter;
-        } else {
-            _bufferPipeline.pos += buffer->frequency;
+        seconds++;
+        if(inBuff.endPos == 0) {
+            out.write(outBuff, frequency);
+        } else{
+            out.write(outBuff,inBuff.endPos-inBuff.pos);
         }
-    }*/
+    }
+
 }
 
 void MixConverter::printDescription(){
@@ -87,7 +107,7 @@ void MixConverter::printDescription(){
 
 unsigned int BassBoostedConverter::getCountOfParams() {return 2;} // initial,final
 
-void BassBoostedConverter::convert(std::vector<std::variant<std::string,unsigned int>> &params,std::vector<std::unique_ptr<Reader>> &streams,Writer out, uint32_t frequency) {
+void BassBoostedConverter::convert(std::vector<std::variant<std::string,unsigned int>> &params,std::vector<std::unique_ptr<Reader>> &streams,Writer &out, uint32_t frequency) {
     auto initial = std::get<unsigned int>(params[0]);
     auto final = std::get<unsigned int>(params[1]);
     BufferPipeline inBuff;
@@ -138,7 +158,7 @@ bool sign (int num){
     }
 }
 
-void DistortionConverter::convert(std::vector<std::variant<std::string,unsigned int>> &params,std::vector<std::unique_ptr<Reader>> &streams,Writer out, uint32_t frequency) {
+void DistortionConverter::convert(std::vector<std::variant<std::string,unsigned int>> &params,std::vector<std::unique_ptr<Reader>> &streams,Writer &out, uint32_t frequency) {
     auto initial = std::get<unsigned int>(params[0]);
     auto final = std::get<unsigned int>(params[1]);
     auto coefficient = std::get<unsigned int>(params[2]);

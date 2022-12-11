@@ -7,16 +7,20 @@
 #include "MainUtils.h"
 
 int main(int argc, char* argv[]) {
+    if(!strcmp(argv[1],"-h") && argc == 2){
+        printHelp();
+        return 0;
+    }
 
+    if(argc > 2 && !strcmp(argv[1],"-c")){
         std::vector<std::string> files;
-        files.push_back("C:\\aboba\\config.txt");
-    files.push_back("C:\\aboba\\out.wav");
-    files.push_back("C:\\aboba\\lesnik.wav");
-        std::vector<std::string> converters;
-        std::vector<std::variant<std::string,unsigned int>> args;
+        for (int i = 2; i < argc; ++i) {
+            files.emplace_back(argv[i]);
+        }
         ConfigParser configParser(files[0]);
+        std::vector<std::variant<std::string, unsigned int>> params;
         try {
-            configParser.parse(args);
+            configParser.parse(params);
         } catch(const BadConfigException& e) {
             std::cerr << e.what() << "\n";
             return BAD_CONFIG;
@@ -26,29 +30,8 @@ int main(int argc, char* argv[]) {
         }
 
         Processor processor;
-        bool permutator = false;
-
-        bool permutated = false;
         try {
-            while(args.begin() != args.end()) {
-                    if (args.size() <= 4) {
-                        if (!permutated) {
-                            processor.convert(files[2], files[1], args);
-                        } else {
-                            processor.convert(permutator ? "tmp2" : "tmp1", files[1], args);
-                        }
-                        break;
-                    } else {
-
-                        if (!permutated) {
-                            processor.convert(files[2], "tmp1", args);
-                            permutated = true;
-                        } else {
-                            processor.convert(permutator ? "tmp2" : "tmp1", permutator ? "tmp1" : "tmp2", args);
-                            permutator = !permutator;
-                        }
-                    }
-            }
+            processor.convert(files,params);
         }
         catch (const NoFileException& e){
             std::cerr << e.what();
@@ -58,15 +41,10 @@ int main(int argc, char* argv[]) {
             return BAD_HEADER;
         }
 
-        if(converters.size() == 2){
-            remove("tmp1");
-        }
-
-        if(converters.size() >=3){
-            remove("tmp1");
-            remove("tmp2");
-        }
         std::cout << "\nConverted successfully\n";
+    } else{
+        std::cout << "Wrong arguments";
+    }
 
     return 0;
 }
