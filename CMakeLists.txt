@@ -10,7 +10,7 @@ set(test_name test)
 
 set(CMAKE_EXE_LINKER_FLAGS "-static")
 
-#[[
+
 if (MSVC)
     # warning level 4 and all warnings as errors
     add_compile_options(/W4 /WX)
@@ -18,9 +18,9 @@ else()
     # lots of warnings and all warnings as errors
     add_compile_options(-Wall -Wextra -pedantic -Werror)
 endif()
-]]
 
-add_library(corelib OBJECT src/Reader/WAVReader.cpp src/Writer/WAVWriter.cpp src/BufferPipeline.cpp src/Processor.cpp  src/Converters/ConvertersFactory.cpp src/Converters/Converters.cpp src/ConfigParser.cpp src/MainUtils.cpp src/Reader/Reader.cpp src/Reader/Reader.h src/Writer/Writer.cpp src/Writer/Writer.h)
+
+add_library(corelib OBJECT src/Reader/WAVReader.cpp src/Writer/WAVWriter.cpp src/BufferPipeline.cpp src/Processor.cpp  src/Converters/ConvertersFactory.cpp src/Converters/Converters.cpp src/ConfigParser.cpp src/MainUtils.cpp src/Reader/Reader.cpp src/Writer/Writer.cpp)
 
 add_executable(${exe_name} src/main.cpp)
 target_link_libraries(${exe_name} corelib)

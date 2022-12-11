@@ -13,8 +13,8 @@ void Processor::convert(std::vector<std::string> &files,std::vector<std::variant
         streams.push_back(std::move(p));
     }
     ConvertersFactory factory;
-    std::string temp1Path = files[0] + '1';
-    std::string temp2Path = files[0] + '2';
+    std::string temp1Path = files[0] + ".tmp1";
+    std::string temp2Path = files[0] + ".tmp2";
     bool tmpUsed = false;
     bool isFirst = true;
     bool permutator = false;
@@ -57,15 +57,19 @@ void Processor::convert(std::vector<std::string> &files,std::vector<std::variant
             }
         }
     }
+    remove(files[0].c_str());
     if(!tmpUsed){
         rename((temp1Path).c_str(),files[0].c_str());
     } else{
         if(!permutator){
             rename((temp1Path).c_str(),files[0].c_str());
-            remove(temp2Path.c_str());
         } else{
             rename((temp2Path).c_str(),files[0].c_str());
-            remove(temp1Path.c_str());
         }
     }
+}
+
+void Processor::deleteTempFiles(const std::string& path) {
+    remove((path + ".tmp1").c_str());
+    remove((path + ".tmp2").c_str());
 }

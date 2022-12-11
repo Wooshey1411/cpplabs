@@ -6,7 +6,8 @@ enum EXCEPTIONS{
     BAD_CONFIG = 1,
     NO_CONFIG_FILE,
     NO_INPUT_FILE,
-    BAD_HEADER
+    BAD_HEADER,
+    BAD_ARGS
 };
 
 class NoFileException : public std::runtime_error{

@@ -17,6 +17,11 @@ int main(int argc, char* argv[]) {
         for (int i = 2; i < argc; ++i) {
             files.emplace_back(argv[i]);
         }
+        if(files.size() < 3){ // minimum 3 - config/in/out
+            std::cerr << "low count of arguments";
+            return BAD_ARGS;
+        }
+
         ConfigParser configParser(files[0]);
         files.erase(files.begin());
         std::vector<std::variant<std::string, unsigned int>> params;
@@ -41,7 +46,7 @@ int main(int argc, char* argv[]) {
             std::cerr << e.what();
             return BAD_HEADER;
         }
-
+        processor.deleteTempFiles(files[0]);
         std::cout << "\nConverted successfully\n";
     } else{
         std::cout << "Wrong arguments";

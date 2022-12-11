@@ -8,6 +8,9 @@ inline const unsigned short BASS_BOOSTED_VOLUME_COEFFICIENT = 16;
 unsigned int MuteConverter::getCountOfParams() {return 2;} // initial,final
 
 void MuteConverter::convert(std::vector<std::variant<std::string,unsigned int>> &params,std::vector<std::unique_ptr<Reader>> &streams,Writer &out, uint32_t frequency) {
+    if(params.size() < getCountOfParams()){
+        throw BadConfigException("Wrong config");
+    }
     auto initial = std::get<unsigned int>(params[0]);
     auto final = std::get<unsigned int>(params[1]);
     BufferPipeline inBuff;
@@ -29,7 +32,7 @@ void MuteConverter::convert(std::vector<std::variant<std::string,unsigned int>> 
         if(inBuff.endPos == 0) {
             out.write(outBuff, frequency);
         } else{
-            out.write(outBuff,inBuff.endPos-inBuff.pos);
+            out.write(outBuff,static_cast<unsigned int>(inBuff.endPos-inBuff.pos));
         }
     }
 }
@@ -44,6 +47,9 @@ MixConverter::MixConverter():_isFinished(false) {}
 unsigned int MixConverter::getCountOfParams() {return 2;} // initial, number of stream
 
 void MixConverter::convert(std::vector<std::variant<std::string,unsigned int>> &params,std::vector<std::unique_ptr<Reader>> &streams,Writer &out, uint32_t frequency) {
+    if(params.size() < getCountOfParams()){
+        throw BadConfigException("Wrong config");
+    }
     auto stream = std::get<unsigned int>(params[0]);
     auto initial = std::get<unsigned int>(params[1]);
 
@@ -93,7 +99,7 @@ void MixConverter::convert(std::vector<std::variant<std::string,unsigned int>> &
         if(inBuff.endPos == 0) {
             out.write(outBuff, frequency);
         } else{
-            out.write(outBuff,inBuff.endPos-inBuff.pos);
+            out.write(outBuff,static_cast<unsigned int>(inBuff.endPos-inBuff.pos));
         }
     }
 
@@ -108,6 +114,9 @@ void MixConverter::printDescription(){
 unsigned int BassBoostedConverter::getCountOfParams() {return 2;} // initial,final
 
 void BassBoostedConverter::convert(std::vector<std::variant<std::string,unsigned int>> &params,std::vector<std::unique_ptr<Reader>> &streams,Writer &out, uint32_t frequency) {
+    if(params.size() < getCountOfParams()){
+        throw BadConfigException("Wrong config");
+    }
     auto initial = std::get<unsigned int>(params[0]);
     auto final = std::get<unsigned int>(params[1]);
     BufferPipeline inBuff;
@@ -135,7 +144,7 @@ void BassBoostedConverter::convert(std::vector<std::variant<std::string,unsigned
         if(inBuff.endPos == 0) {
             out.write(outBuff, frequency);
         } else{
-            out.write(outBuff,inBuff.endPos-inBuff.pos);
+            out.write(outBuff,static_cast<unsigned int>(inBuff.endPos-inBuff.pos));
         }
     }
 }
@@ -159,6 +168,9 @@ bool sign (int num){
 }
 
 void DistortionConverter::convert(std::vector<std::variant<std::string,unsigned int>> &params,std::vector<std::unique_ptr<Reader>> &streams,Writer &out, uint32_t frequency) {
+    if(params.size() < 3){
+        throw BadConfigException("Wrong config");
+    }
     auto initial = std::get<unsigned int>(params[0]);
     auto final = std::get<unsigned int>(params[1]);
     auto coefficient = std::get<unsigned int>(params[2]);
@@ -227,7 +239,7 @@ void DistortionConverter::convert(std::vector<std::variant<std::string,unsigned 
         if(inBuff.endPos == 0) {
             out.write(outBuff, frequency);
         } else{
-            out.write(outBuff,inBuff.endPos-inBuff.pos);
+            out.write(outBuff,static_cast<unsigned int>(inBuff.endPos-inBuff.pos));
         }
     }
 }

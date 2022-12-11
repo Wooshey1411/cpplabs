@@ -5,12 +5,11 @@
 
 class WAVReader : public Reader{
 public:
-    WAVReader(std::string_view path) : Reader(path){};
+    WAVReader(std::string_view path) : Reader(path){_wavHeader.listExist = false;};
     void readHeader();
     void printHeader();
     const Header* getHeader();
     ~WAVReader() override;
 private:
-   // std::string _path;
     Header _wavHeader;
 };
