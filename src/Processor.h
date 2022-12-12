@@ -6,10 +6,12 @@
 
 class Processor {
 public:
-    Processor() = default;
+    Processor();
     void convert(std::vector<std::string> &files,std::vector<std::variant<std::string,unsigned int>> &args);
     void deleteTempFiles(const std::string& path);
 
-    ~Processor() = default;
+    ~Processor();
+private:
+    std::string _outPath;
 };
 

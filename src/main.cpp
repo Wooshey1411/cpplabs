@@ -7,7 +7,7 @@
 #include "MainUtils.h"
 
 int main(int argc, char* argv[]) {
-    if(!strcmp(argv[1],"-h") && argc == 2){
+    if(argc == 2 && !strcmp(argv[1],"-h")){
         printHelp();
         return 0;
     }
@@ -41,22 +41,17 @@ int main(int argc, char* argv[]) {
         }
         catch (const NoFileException& e){
             std::cerr << e.what();
-            processor.deleteTempFiles(files[0]);
             return NO_INPUT_FILE;
         }catch (const BadHeaderException& e){
             std::cerr << e.what();
-            processor.deleteTempFiles(files[0]);
             return BAD_HEADER;
         }catch (const BadConfigException& e){
             std::cerr << e.what();
-            processor.deleteTempFiles(files[0]);
             return BAD_CONFIG;
         }catch(const std::bad_variant_access&){
             std::cerr << "Bad params in config";
-            processor.deleteTempFiles(files[0]);
             return BAD_CONFIG;
         }
-        processor.deleteTempFiles(files[0]);
         std::cout << "\nConverted successfully\n";
     } else{
         std::cout << "Wrong arguments";
