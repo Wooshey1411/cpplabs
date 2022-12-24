@@ -4,7 +4,7 @@
 #include <fstream>
 #include <sstream>
 #include <typeinfo>
-
+#include "CSVParser.h"
 
 template<class... Args,class V>
 auto increaseTuple(std::tuple<Args...> t,V value){
@@ -53,7 +53,7 @@ struct get_Nth_type<0, T, types...>
 
 
 int main() {
-    std::tuple<int,char,std::string,std::string,int> tuple{1,'m',"Vor","AD",11};
+   /* std::tuple<int,char,std::string,std::string,int> tuple{1,'m',"Vor","AD",11};
     // std::get<0>(tuple) = 35;
     //  std::get<1>(tuple) = 'd';
 
@@ -65,5 +65,10 @@ int main() {
     std::cout << std::endl;
     get_Nth_type<4,int,char,std::string,std::string,int>::type type;
 
-    std::cout << typeid(type).name() << "\n";
+    std::cout << typeid(type).name() << "\n";*/
+
+    std::ifstream stream("C:\\pars\\p.txt");
+    CSVParser parser(stream,0);
+    parser.printLine();
+    parser.printLine();
 }
