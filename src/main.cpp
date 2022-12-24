@@ -68,7 +68,14 @@ int main() {
     std::cout << typeid(type).name() << "\n";*/
 
     std::ifstream stream("C:\\pars\\p.txt");
-    CSVParser parser(stream,0);
-    parser.printLine();
-    parser.printLine();
+    CSVParser<std::string,std::string,std::string,std::string> parser(stream,0);
+    parser.setDelimiters('\n',';','/');
+    for (auto a = parser.begin(); a.operator!=(parser.end()) ; a.operator++()) {
+        auto d = a.parseLine();
+        for(auto & it : d){
+            std::cout << it << " ";
+        }
+        std::cout << "\n";
+    }
+
 }
