@@ -45,8 +45,8 @@ private:
     class CSVIterator {
     friend class CSVParser;
     public:
-        CSVIterator(std::ifstream& stream, unsigned int pos, CSVParser<Args...> &parser):
-               _fileLine(EMPTY_STRING), _isEnd(false),_pos(pos),_in(stream),_parser(parser) {}
+        CSVIterator(std::ifstream& stream, unsigned int line, CSVParser<Args...> &parser):
+               _fileLine(EMPTY_STRING),_isEnd(false),_line(line),_in(stream),_parser(parser),_filePos(0) {}
         std::vector<std::string> parseLine() {
             if(_isEnd || _fileLine == EMPTY_STRING){
                 throw std::runtime_error("No data");
@@ -65,6 +65,9 @@ private:
                     continue;
                 }
                 if(_fileLine[i] == _parser._columnDelimiter || i == _fileLine.size()-1){
+                    if(i == _fileLine.size() - 1){
+                        str.push_back(_fileLine[i]);
+                    }
                     strings.push_back(str);
                     str.clear();
                     isEnded = true;
@@ -84,7 +87,7 @@ private:
         }
 
         bool operator==(const CSVIterator& iterator){
-            if(this->_isEnd == iterator._isEnd && this->_fileLine == iterator._fileLine && this->_pos == iterator._pos){
+            if(this->_isEnd == iterator._isEnd && this->_fileLine == iterator._fileLine && this->_line == iterator._line){
                 return true;
             }
             return false;
@@ -94,24 +97,49 @@ private:
             return !(*this == iterator);
         }
 
-        CSVIterator operator ++(){
-            if(this->_pos == _parser._countOfLines-1){
+
+        CSVIterator& operator+=(const unsigned int num){
+            if(this->_line+num >= _parser._countOfLines){
                 this->_fileLine = EMPTY_STRING;
                 this->_isEnd = true;
-                this->_pos = _parser._countOfLines;
+                this->_line = _parser._countOfLines;
                 return *this;
             }
-            this->_pos++;
-            _parser.getLine(_parser._in,this->_fileLine);
+
+            this->_line+=num;
+            _parser._in.seekg(_filePos);
+            for (unsigned int i = 0; i < num; ++i) {
+                _parser.getLine(this->_in,this->_fileLine);
+            }
+            _filePos = _in.tellg();
             return *this;
         }
+        CSVIterator& operator+(const unsigned int num){
+            *this+=num;
+            return *this;
+        }
+        CSVIterator& operator ++(){
+            *this+=1;
+            return *this;
+        }
+        CSVIterator operator ++(int){
+            CSVIterator iterator(this->_in,this->_line,this->_parser);
+            iterator._isEnd = this->_isEnd;
+            iterator._fileLine = this->_fileLine;
+            iterator._filePos = this->_filePos;
+
+            *this+=1;
+            return iterator;
+        }
+
 
     private:
         std::string _fileLine;
         bool _isEnd;
-        unsigned int _pos;
+        unsigned int _line;
         std::ifstream& _in;
         CSVParser<Args...>& _parser;
+        unsigned long long _filePos;
     };
 
 public:
@@ -130,7 +158,10 @@ public:
 
     CSVIterator begin(){
         CSVIterator it(_in,_countOfSkips,*this);
-        getLine(_in,it._fileLine);
+        _in.clear();
+        _in.seekg(0, std::ios::beg);
+        getLine(it._in,it._fileLine);
+        it._filePos = _in.tellg();
         return it;
     }
 

@@ -70,12 +70,13 @@ int main() {
     std::ifstream stream("C:\\pars\\p.txt");
     CSVParser<std::string,std::string,std::string,std::string> parser(stream,0);
     parser.setDelimiters('\n',';','/');
-    for (auto a = parser.begin(); a.operator!=(parser.end()) ; a.operator++()) {
-        auto d = a.parseLine();
-        for(auto & it : d){
-            std::cout << it << " ";
-        }
-        std::cout << "\n";
+    auto a =  parser.begin();
+    auto b = parser.begin();
+    a++;
+    b+=2;
+    auto vect = a.parseLine();
+    for(auto it = vect.begin();it!=vect.end();it++){
+        std::cout << *it << " ";
     }
 
 }
