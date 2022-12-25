@@ -128,7 +128,7 @@ private:
             try {
                 setParam<sizeof...(Args) - 1>(args, tuple);
             }catch(const std::runtime_error& e){
-                throw BadLineException("Failed to convert it " + std::string(e.what()) + " column at " + std::to_string(_line+1) + " line");
+                throw BadLineException("Failed to convert at " + std::string(e.what()) + " column at " + std::to_string(_line+1) + " line");
             }
             return tuple;
         }
@@ -143,11 +143,11 @@ private:
 
         std::vector<std::string> parseLine() {
             if(_isEnd || _fileLine == EMPTY_STRING){
-                throw std::runtime_error("No data");
+                throw BadLineException("No data at " + std::to_string(_line+1) + " line");
             }
 
             if(_fileLine[0] == _parser._columnDelimiter){
-                throw std::runtime_error("Bad line");
+                throw BadLineException(std::to_string(_line+1) + " line started with column delimiter char");
             }
 
             std::string str = "";
@@ -155,7 +155,11 @@ private:
             std::vector<std::string> strings;
             for(unsigned int i = 0; i < _fileLine.length();i++){
                 isEnded = false;
-                if((_fileLine[i] == _parser._columnDelimiter && _fileLine[i-1] == _parser._shieldChar) || _fileLine[i] == _parser._shieldChar){
+                if((_fileLine[i] == _parser._columnDelimiter && _fileLine[i-1] == _parser._shieldChar)){
+                    str.push_back(_fileLine[i]);
+                    continue;
+                }
+                if(_fileLine[i] == _parser._shieldChar){
                     continue;
                 }
                 if(_fileLine[i] == _parser._columnDelimiter || i == _fileLine.size()-1){
@@ -171,11 +175,11 @@ private:
             }
 
             if(!isEnded){
-                throw std::runtime_error("Bad line");
+                throw BadLineException("Failed to parse line " + std::to_string(_line+1));
             }
 
             if(strings.size() != sizeof...(Args)){
-                throw std::runtime_error("Bad count of columns");
+                throw BadLineException("Count of arguments at line " + std::to_string(_line+1) + " is not " + std::to_string(sizeof...(Args)));
             }
             return strings;
         }
@@ -224,11 +228,6 @@ public:
         _lineDelimiter = lineDelimiter;
         _columnDelimiter = columnDelimiter;
         _shieldChar = shieldChar;
-    }
-    void printLine() {
-        std::string str;
-        getLine(_in,str);
-        std::cout << str << "\n";
     }
 
     CSVIterator begin(){
