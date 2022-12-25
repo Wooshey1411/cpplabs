@@ -29,10 +29,11 @@ class CSVParser {
 private:
     unsigned int _countOfSkips;
     unsigned int _countOfLines;
-    std::ifstream& _in;
+    std::ifstream _in;
     char _columnDelimiter;
     char _lineDelimiter;
     char _shieldChar;
+    std::string _path;
 
     template<class Ch, class Tr, class Al>
     void getLine(std::basic_ifstream<Ch, Tr> &i, std::basic_string<Ch, Tr, Al> &str) {
@@ -214,8 +215,9 @@ private:
     };
 
 public:
-    CSVParser(std::ifstream& stream,unsigned int countOfSkips):_countOfSkips(countOfSkips),_countOfLines(0),
-    _in(stream),_columnDelimiter(DEFAULT_COLUMN_DELIMITER),_lineDelimiter(DEFAULT_LINE_DELIMITER),_shieldChar(DEFAULT_SHIELD_CHAR) {
+    CSVParser(const std::string &path,unsigned int countOfSkips):_countOfSkips(countOfSkips),_countOfLines(0),
+    _columnDelimiter(DEFAULT_COLUMN_DELIMITER),_lineDelimiter(DEFAULT_LINE_DELIMITER),_shieldChar(DEFAULT_SHIELD_CHAR),_path(path) {
+        _in.open(_path,std::ios::binary);
         if(!_in.is_open() || _in.bad()){
             throw BadFileException("Stream doesn't open");
         }
@@ -246,4 +248,3 @@ public:
         return it;
     }
 };
-
