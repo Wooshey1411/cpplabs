@@ -113,15 +113,23 @@ private:
         }
 
         std::tuple<Args...> operator*(){
+
+            if(this->_line >= this->_parser._countOfLines){
+                throw BadPointerException("Pointer cannot be unnamed");
+            }
+
             std::vector<std::string> args = parseLine();
             if(args.size() != sizeof...(Args)){
                 throw BadLineException("Count of arguments at line " + std::to_string(_line+1) + " is not " + std::to_string(sizeof...(Args)));
             }
 
-
-
             std::tuple<Args...> tuple;
-            setParam<sizeof...(Args)-1>(args,tuple);
+
+            try {
+                setParam<sizeof...(Args) - 1>(args, tuple);
+            }catch(const std::runtime_error& e){
+                throw BadLineException("Failed to convert it " + std::string(e.what()) + " column at " + std::to_string(_line+1) + " line");
+            }
             return tuple;
         }
 
@@ -186,7 +194,11 @@ private:
         template<std::size_t N>
         std::tuple<Args...> setParam(std::vector<std::string> vector,std::tuple<Args...> &tuple){
             typename std::tuple_element<N, std::tuple<Args...> >::type val;
-            convertToType<typename std::tuple_element<N, std::tuple<Args...>>::type>(vector[N],val);
+            try {
+                convertToType<typename std::tuple_element<N, std::tuple<Args...>>::type>(vector[N],val);
+            }catch(...){
+                throw std::runtime_error(std::to_string(N+1));
+            }
             std::get<N>(tuple) = val;
             if constexpr (N == 0){
                 return tuple;

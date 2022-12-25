@@ -11,7 +11,11 @@ int main() {
     auto a =  parser.begin();
     auto b = parser.begin();
     a++;
-    b+=1;
+    b+=3;
+    if(b == parser.end()){
+        std::cout << "end";
+        return 0;
+    }
     auto tup = *b;
     std::cout << tup;
 
