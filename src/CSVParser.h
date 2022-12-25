@@ -1,5 +1,6 @@
 #include <fstream>
 #include <vector>
+#include "Exceptions.h"
 
 inline const std::string EMPTY_STRING = "";
 inline const char DEFAULT_LINE_DELIMITER = '\n';
@@ -112,8 +113,14 @@ private:
         }
 
         std::tuple<Args...> operator*(){
-            std::tuple<Args...> tuple;
             std::vector<std::string> args = parseLine();
+            if(args.size() != sizeof...(Args)){
+                throw BadLineException("Count of arguments at line " + std::to_string(_line+1) + " is not " + std::to_string(sizeof...(Args)));
+            }
+
+
+
+            std::tuple<Args...> tuple;
             setParam<sizeof...(Args)-1>(args,tuple);
             return tuple;
         }
@@ -172,7 +179,7 @@ private:
             char s;
             stream >> s;
             if (!stream.eof()){
-                throw std::runtime_error("error");
+                throw std::runtime_error("Failed type convert");
             }
         }
 
@@ -192,7 +199,15 @@ private:
 
 public:
     CSVParser(std::ifstream& stream,unsigned int countOfSkips):_countOfSkips(countOfSkips),_countOfLines(0),
-    _in(stream),_columnDelimiter(DEFAULT_COLUMN_DELIMITER),_lineDelimiter(DEFAULT_LINE_DELIMITER),_shieldChar(DEFAULT_SHIELD_CHAR) {getCountOfLines();}
+    _in(stream),_columnDelimiter(DEFAULT_COLUMN_DELIMITER),_lineDelimiter(DEFAULT_LINE_DELIMITER),_shieldChar(DEFAULT_SHIELD_CHAR) {
+        if(!_in.is_open() || _in.bad()){
+            throw BadFileException("Stream doesn't open");
+        }
+        getCountOfLines();
+        if(_countOfLines < countOfSkips){
+            throw BadFileException("Skipped lines more than lines in file");
+        }
+    }
     void setDelimiters(const char lineDelimiter, const char columnDelimiter, const char shieldChar){
         _lineDelimiter = lineDelimiter;
         _columnDelimiter = columnDelimiter;
