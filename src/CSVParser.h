@@ -187,6 +187,10 @@ private:
 
         template<class V>
         void convertToType(const std::string& input, V &val){
+            if(std::is_same<V,std::string>()){
+                val = input;
+                return;
+            }
             std::istringstream stream(input);
             stream >> val;
             char s;
