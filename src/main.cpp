@@ -5,8 +5,8 @@
 #include "CSVParser.h"
 
 int main() {
-    CSVParser<std::string,std::string,std::string> parser("C:\\pars\\p.txt",0);
-    parser.setDelimiters('\n',',','\\');
+    CSVParser<int> parser("C:\\pars\\p.txt",0);
+   // parser.setDelimiters('\n',',','\\');
     for(auto it = parser.begin(); it != parser.end(); it++){
         std::cout << *it;
         std::cout << "\n";

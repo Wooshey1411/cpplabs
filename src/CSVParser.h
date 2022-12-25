@@ -157,19 +157,14 @@ private:
             for(unsigned int i = 0; i < _fileLine.length();i++){
                 isEnded = false;
 
-                if((_fileLine[i] == _parser._columnDelimiter && _fileLine[i-1] == _parser._shieldChar)){
+                if(_fileLine[i] == _parser._columnDelimiter && _fileLine[i-1] == _parser._shieldChar){
                     str.push_back(_fileLine[i]);
                     continue;
                 }
-
-                if((i != 0) && (_fileLine[i] == _parser._shieldChar) && (_fileLine[i-1] == _parser._shieldChar)){
-                    str.push_back(_fileLine[i]);
+                if(_fileLine[i] == _parser._shieldChar && i <_fileLine.length()-1 && _fileLine[i+1] == _parser._columnDelimiter){
                     continue;
                 }
 
-                if(_fileLine[i] == _parser._shieldChar){
-                    continue;
-                }
 
                 if(_fileLine[i] == _parser._columnDelimiter || i == _fileLine.size()-1){
                     if(i == _fileLine.size() - 1){
@@ -195,7 +190,7 @@ private:
 
         template<class V>
         void convertToType(const std::string& input, V &val){
-            if(std::is_same<V,std::string>()){
+            if constexpr (std::is_same<V,std::string>()){
                 val = input;
                 return;
             }
