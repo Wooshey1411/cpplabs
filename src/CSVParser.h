@@ -2,6 +2,10 @@
 #include <vector>
 
 inline const std::string EMPTY_STRING = "";
+inline const char DEFAULT_LINE_DELIMITER = '\n';
+inline const char DEFAULT_COLUMN_DELIMITER = ';';
+inline const char DEFAULT_SHIELD_CHAR = 0;
+
 
 template<size_t I,class Ch,class Tr, class... Args>
 auto& tp(std::basic_ostream<Ch,Tr>& o,std::tuple<Args...> t){
@@ -188,7 +192,7 @@ private:
 
 public:
     CSVParser(std::ifstream& stream,unsigned int countOfSkips):_countOfSkips(countOfSkips),_countOfLines(0),
-    _in(stream),_columnDelimiter(';'),_lineDelimiter('\n'),_shieldChar(0) {getCountOfLines();}
+    _in(stream),_columnDelimiter(DEFAULT_COLUMN_DELIMITER),_lineDelimiter(DEFAULT_LINE_DELIMITER),_shieldChar(DEFAULT_SHIELD_CHAR) {getCountOfLines();}
     void setDelimiters(const char lineDelimiter, const char columnDelimiter, const char shieldChar){
         _lineDelimiter = lineDelimiter;
         _columnDelimiter = columnDelimiter;
