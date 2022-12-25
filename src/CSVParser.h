@@ -3,6 +3,22 @@
 
 inline const std::string EMPTY_STRING = "";
 
+template<size_t I,class Ch,class Tr, class... Args>
+auto& tp(std::basic_ostream<Ch,Tr>& o,std::tuple<Args...> t){
+    o << std::get<I>(t);
+    if constexpr (I+1 < sizeof...(Args)){
+        o << ", ";
+        return tp<I+1>(o,t);
+    } else{
+        return o;
+    }
+}
+
+template<class Ch,class Tr, class... Args>
+auto operator<<(std::basic_ostream<Ch, Tr>& os, std::tuple<Args...> const& t){
+    tp<0>(os,t);
+}
+
 template<class... Args>
 class CSVParser {
 private:
@@ -40,13 +56,72 @@ private:
         }
     }
 
-
-
     class CSVIterator {
     friend class CSVParser;
     public:
         CSVIterator(std::ifstream& stream, unsigned int line, CSVParser<Args...> &parser):
                _fileLine(EMPTY_STRING),_isEnd(false),_line(line),_in(stream),_parser(parser),_filePos(0) {}
+
+        bool operator==(const CSVIterator& iterator){
+            if(this->_isEnd == iterator._isEnd && this->_fileLine == iterator._fileLine && this->_line == iterator._line){
+                return true;
+            }
+            return false;
+        }
+        bool operator!=(const CSVIterator& iterator){
+            return !(*this == iterator);
+        }
+
+        CSVIterator& operator+=(const unsigned int num){
+            if(this->_line+num >= _parser._countOfLines){
+                this->_fileLine = EMPTY_STRING;
+                this->_isEnd = true;
+                this->_line = _parser._countOfLines;
+                return *this;
+            }
+            _in.clear();
+            _in.seekg(0,std::ios::beg);
+            this->_line+=num;
+            this->_in.seekg(_filePos);
+            for (unsigned int i = 0; i < num; ++i) {
+                _parser.getLine(this->_in,this->_fileLine);
+            }
+            _filePos = _in.tellg();
+            return *this;
+        }
+        CSVIterator& operator+(const unsigned int num){
+            *this+=num;
+            return *this;
+        }
+        CSVIterator& operator ++(){
+            *this+=1;
+            return *this;
+        }
+        CSVIterator operator ++(int){
+            CSVIterator iterator(this->_in,this->_line,this->_parser);
+            iterator._isEnd = this->_isEnd;
+            iterator._fileLine = this->_fileLine;
+            iterator._filePos = this->_filePos;
+
+            *this+=1;
+            return iterator;
+        }
+
+        std::tuple<Args...> operator*(){
+            std::tuple<Args...> tuple;
+            std::vector<std::string> args = parseLine();
+            setParam<sizeof...(Args)-1>(args,tuple);
+            return tuple;
+        }
+
+    private:
+        std::string _fileLine;
+        bool _isEnd;
+        unsigned int _line;
+        std::ifstream& _in;
+        CSVParser<Args...>& _parser;
+        unsigned long long _filePos;
+
         std::vector<std::string> parseLine() {
             if(_isEnd || _fileLine == EMPTY_STRING){
                 throw std::runtime_error("No data");
@@ -86,60 +161,29 @@ private:
             return strings;
         }
 
-        bool operator==(const CSVIterator& iterator){
-            if(this->_isEnd == iterator._isEnd && this->_fileLine == iterator._fileLine && this->_line == iterator._line){
-                return true;
+        template<class V>
+        void convertToType(const std::string& input, V &val){
+            std::istringstream stream(input);
+            stream >> val;
+            char s;
+            stream >> s;
+            if (!stream.eof()){
+                throw std::runtime_error("error");
             }
-            return false;
         }
 
-        bool operator!=(const CSVIterator& iterator){
-            return !(*this == iterator);
-        }
-
-
-        CSVIterator& operator+=(const unsigned int num){
-            if(this->_line+num >= _parser._countOfLines){
-                this->_fileLine = EMPTY_STRING;
-                this->_isEnd = true;
-                this->_line = _parser._countOfLines;
-                return *this;
+        template<std::size_t N>
+        std::tuple<Args...> setParam(std::vector<std::string> vector,std::tuple<Args...> &tuple){
+            typename std::tuple_element<N, std::tuple<Args...> >::type val;
+            convertToType<typename std::tuple_element<N, std::tuple<Args...>>::type>(vector[N],val);
+            std::get<N>(tuple) = val;
+            if constexpr (N == 0){
+                return tuple;
+            } else {
+                return setParam<N - 1>(vector, tuple);
             }
-
-            this->_line+=num;
-            _parser._in.seekg(_filePos);
-            for (unsigned int i = 0; i < num; ++i) {
-                _parser.getLine(this->_in,this->_fileLine);
-            }
-            _filePos = _in.tellg();
-            return *this;
-        }
-        CSVIterator& operator+(const unsigned int num){
-            *this+=num;
-            return *this;
-        }
-        CSVIterator& operator ++(){
-            *this+=1;
-            return *this;
-        }
-        CSVIterator operator ++(int){
-            CSVIterator iterator(this->_in,this->_line,this->_parser);
-            iterator._isEnd = this->_isEnd;
-            iterator._fileLine = this->_fileLine;
-            iterator._filePos = this->_filePos;
-
-            *this+=1;
-            return iterator;
         }
 
-
-    private:
-        std::string _fileLine;
-        bool _isEnd;
-        unsigned int _line;
-        std::ifstream& _in;
-        CSVParser<Args...>& _parser;
-        unsigned long long _filePos;
     };
 
 public:
@@ -171,8 +215,5 @@ public:
         it._isEnd = true;
         return it;
     }
-
-
-
 };
 
