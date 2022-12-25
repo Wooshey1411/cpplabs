@@ -12,7 +12,7 @@ template<size_t I,class Ch,class Tr, class... Args>
 auto& tp(std::basic_ostream<Ch,Tr>& o,std::tuple<Args...> t){
     o << std::get<I>(t);
     if constexpr (I+1 < sizeof...(Args)){
-        o << ", ";
+        o << " | ";
         return tp<I+1>(o,t);
     } else{
         return o;
@@ -156,13 +156,21 @@ private:
             std::vector<std::string> strings;
             for(unsigned int i = 0; i < _fileLine.length();i++){
                 isEnded = false;
+
                 if((_fileLine[i] == _parser._columnDelimiter && _fileLine[i-1] == _parser._shieldChar)){
                     str.push_back(_fileLine[i]);
                     continue;
                 }
+
+                if((i != 0) && (_fileLine[i] == _parser._shieldChar) && (_fileLine[i-1] == _parser._shieldChar)){
+                    str.push_back(_fileLine[i]);
+                    continue;
+                }
+
                 if(_fileLine[i] == _parser._shieldChar){
                     continue;
                 }
+
                 if(_fileLine[i] == _parser._columnDelimiter || i == _fileLine.size()-1){
                     if(i == _fileLine.size() - 1){
                         str.push_back(_fileLine[i]);
