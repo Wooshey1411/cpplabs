@@ -93,6 +93,7 @@ private:
                 _parser.getLine(this->_in,this->_fileLine);
             }
             _filePos = _in.tellg();
+            fillTuple();
             return *this;
         }
         CSVIterator& operator+(const unsigned int num){
@@ -114,24 +115,7 @@ private:
         }
 
         std::tuple<Args...> operator*(){
-
-            if(this->_line >= this->_parser._countOfLines){
-                throw BadPointerException("Pointer cannot be unnamed");
-            }
-
-            std::vector<std::string> args = parseLine();
-            if(args.size() != sizeof...(Args)){
-                throw BadLineException("Count of arguments at line " + std::to_string(_line+1) + " is not " + std::to_string(sizeof...(Args)));
-            }
-
-            std::tuple<Args...> tuple;
-
-            try {
-                setParam<sizeof...(Args) - 1>(args, tuple);
-            }catch(const std::runtime_error& e){
-                throw BadLineException("Failed to convert at " + std::string(e.what()) + " column at " + std::to_string(_line+1) + " line");
-            }
-            return tuple;
+            return _tuple;
         }
 
     private:
@@ -141,6 +125,7 @@ private:
         std::ifstream& _in;
         CSVParser<Args...>& _parser;
         unsigned long long _filePos;
+        std::tuple<Args...> _tuple;
 
         std::vector<std::string> parseLine() {
             if(_isEnd || _fileLine == EMPTY_STRING){
@@ -219,6 +204,18 @@ private:
             }
         }
 
+        void fillTuple(){
+            std::vector<std::string> args = parseLine();
+            if(args.size() != sizeof...(Args)){
+                throw BadLineException("Count of arguments at line " + std::to_string(_line+1) + " is not " + std::to_string(sizeof...(Args)));
+            }
+
+            try {
+                setParam<sizeof...(Args) - 1>(args, _tuple);
+            }catch(const std::runtime_error& e){
+                throw BadLineException("Failed to convert at " + std::string(e.what()) + " column at " + std::to_string(_line+1) + " line");
+            }
+        }
     };
 
 public:
@@ -244,6 +241,7 @@ public:
         _in.clear();
         _in.seekg(0, std::ios::beg);
         getLine(it._in,it._fileLine);
+        it.fillTuple();
         it._filePos = _in.tellg();
         return it;
     }
