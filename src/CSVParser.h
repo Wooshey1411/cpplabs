@@ -4,7 +4,7 @@
 
 inline const std::string EMPTY_STRING = "";
 inline const char DEFAULT_LINE_DELIMITER = '\n';
-inline const char DEFAULT_COLUMN_DELIMITER = ';';
+inline const char DEFAULT_COLUMN_DELIMITER = ',';
 inline const char DEFAULT_SHIELD_CHAR = 0;
 
 
@@ -22,13 +22,13 @@ auto& tp(std::basic_ostream<Ch,Tr>& o,std::tuple<Args...> t){
 template<class Ch,class Tr, class... Args>
 auto operator<<(std::basic_ostream<Ch, Tr>& os, std::tuple<Args...> const& t){
     tp<0>(os,t);
+    return &os;
 }
 
 template<class... Args>
 class CSVParser {
 private:
-    unsigned int _countOfSkips;
-    unsigned int _countOfLines;
+    int _countOfSkips;
     std::ifstream _in;
     char _columnDelimiter;
     char _lineDelimiter;
@@ -46,27 +46,12 @@ private:
             str.push_back(c);
         }
     }
-    void getCountOfLines() {
-        if (_countOfLines == 0) {
-            _in.clear();
-            _in.seekg(0, std::ios::beg);
-
-            std::string str;
-            _countOfLines = 0;
-            while (!_in.eof()) {
-                getLine(_in, str);
-                _countOfLines++;
-            }
-            _in.clear();
-            _in.seekg(0,std::ios::beg);
-        }
-    }
 
     class CSVIterator {
-    friend class CSVParser;
+        friend class CSVParser;
     public:
         CSVIterator(std::ifstream& stream, unsigned int line, CSVParser<Args...> &parser):
-               _fileLine(EMPTY_STRING),_isEnd(false),_line(line),_in(stream),_parser(parser),_filePos(0) {}
+                _fileLine(EMPTY_STRING),_isEnd(false),_line(line),_in(stream),_parser(parser),_filePos(0) {}
 
         bool operator==(const CSVIterator& iterator){
             if(this->_isEnd == iterator._isEnd && this->_fileLine == iterator._fileLine && this->_line == iterator._line){
@@ -79,19 +64,26 @@ private:
         }
 
         CSVIterator& operator+=(const unsigned int num){
-            if(this->_line+num >= _parser._countOfLines){
-                this->_fileLine = EMPTY_STRING;
-                this->_isEnd = true;
-                this->_line = _parser._countOfLines;
+
+            if(_isEnd){
                 return *this;
             }
+
             _in.clear();
             _in.seekg(0,std::ios::beg);
-            this->_line+=num;
             this->_in.seekg(_filePos);
             for (unsigned int i = 0; i < num; ++i) {
                 _parser.getLine(this->_in,this->_fileLine);
             }
+
+            if(_fileLine == EMPTY_STRING){
+                this->_fileLine = EMPTY_STRING;
+                this->_isEnd = true;
+                this->_line = -1;
+                return *this;
+            }
+
+            this->_line+=num;
             _filePos = _in.tellg();
             fillTuple();
             return *this;
@@ -114,14 +106,14 @@ private:
             return iterator;
         }
 
-        std::tuple<Args...> operator*(){
+        std::tuple<Args...> operator*() const{
             return _tuple;
         }
 
     private:
         std::string _fileLine;
         bool _isEnd;
-        unsigned int _line;
+         int _line;
         std::ifstream& _in;
         CSVParser<Args...>& _parser;
         unsigned long long _filePos;
@@ -219,15 +211,14 @@ private:
     };
 
 public:
-    CSVParser(const std::string &path,unsigned int countOfSkips):_countOfSkips(countOfSkips),_countOfLines(0),
-    _columnDelimiter(DEFAULT_COLUMN_DELIMITER),_lineDelimiter(DEFAULT_LINE_DELIMITER),_shieldChar(DEFAULT_SHIELD_CHAR),_path(path) {
+    CSVParser(const std::string &path, int countOfSkips):_countOfSkips(countOfSkips),
+                                                                 _columnDelimiter(DEFAULT_COLUMN_DELIMITER),_lineDelimiter(DEFAULT_LINE_DELIMITER),_shieldChar(DEFAULT_SHIELD_CHAR),_path(path) {
         _in.open(_path,std::ios::binary);
         if(!_in.is_open() || _in.bad()){
             throw BadFileException("Stream doesn't open");
         }
-        getCountOfLines();
-        if(_countOfLines < countOfSkips){
-            throw BadFileException("Skipped lines more than lines in file");
+        if(_countOfSkips < 0){
+            throw BadFileException("Count of skips less than 0");
         }
     }
     void setDelimiters(const char lineDelimiter, const char columnDelimiter, const char shieldChar){
@@ -240,14 +231,19 @@ public:
         CSVIterator it(_in,_countOfSkips,*this);
         _in.clear();
         _in.seekg(0, std::ios::beg);
-        getLine(it._in,it._fileLine);
+        for(int i = 0; i <= _countOfSkips;i++){
+            getLine(it._in,it._fileLine);
+            if(it._fileLine == EMPTY_STRING){
+                throw BadFileException("Count of skips more than lines in file");
+            }
+        }
         it.fillTuple();
         it._filePos = _in.tellg();
         return it;
     }
 
     CSVIterator end(){
-        CSVIterator it(_in,_countOfLines,*this);
+        CSVIterator it(_in,-1,*this);
         it._fileLine = EMPTY_STRING;
         it._isEnd = true;
         return it;
