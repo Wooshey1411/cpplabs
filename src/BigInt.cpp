@@ -3,6 +3,7 @@
 #include <memory>
 const unsigned short basicBase = 256;
 const unsigned short decimalBase = 10;
+const unsigned char bitsInByte = 8;
 const unsigned char bytesInInt = sizeof(long);
 
 BigInt abs(const BigInt& num){
@@ -80,7 +81,7 @@ BigInt BigInt::div (const BigInt& num, char mode){
         temp._numberDigits[0] = this->_numberDigits[this->_countOfDigits - 1 - i];
         if (temp >= absNum){
             takeDigits = true;
-            unsigned long digit = 0;
+            unsigned char digit = 0;
             while (temp >= absNum){
                 digit++;
                 temp-=absNum;
@@ -125,7 +126,7 @@ BigInt::BigInt(long num, unsigned short baseS)
     unsigned long temp = abs(num);
     unsigned int len = 0;
     while(true){
-        _numberDigits[len] = temp % base.getInstance();
+        _numberDigits[len] = static_cast<unsigned char>(temp % base.getInstance());
         temp/=base.getInstance();
         len++;
         if(temp == 0)
@@ -145,7 +146,7 @@ BigInt::BigInt(long num)
     unsigned long temp = abs(num);
     unsigned int len = 0;
     while(true){
-        _numberDigits[len] = temp % base.getInstance();
+        _numberDigits[len] = static_cast<unsigned char>(temp % base.getInstance()); // base [1;256]
         temp/=base.getInstance();
         len++;
         if(temp == 0)
@@ -283,7 +284,7 @@ BigInt BigInt::operator~() const{
 
 
     for (unsigned int i = 0; i < x._countOfDigits; ++i) {
-        for (int j = 0; j < 8; ++j) {
+        for (int j = 0; j < bitsInByte; ++j) {
             if(static_cast<bool>((1 << j) & x._numberDigits[i]))
                 x._numberDigits[i] &= ~(1 << j);
             else
@@ -357,8 +358,8 @@ BigInt& BigInt::operator+=(const BigInt& num){
         else
             tmp = static_cast<unsigned short>(maxNum->_numberDigits[i]) + carry;
 
-        this->_numberDigits[i] = tmp % base.getInstance(); // tmp % base <= 2^8 - 1
-        carry = tmp / base.getInstance(); // carry is [0:1];
+        this->_numberDigits[i] = static_cast<unsigned char>(tmp % base.getInstance()); // tmp % base <= 2^8 - 1
+        carry = static_cast<unsigned char>(tmp / base.getInstance()); // carry is [0:1];
 
         if(i == maxLen - 1 && carry == 1) // 999 + 1 = 1000
         {
@@ -412,7 +413,7 @@ BigInt& BigInt::operator-=(const BigInt& num){
             this->_numberDigits[i] = static_cast<unsigned char>(tmp); // tmp <= base - 1;
         }else{
             if(firstNum->_numberDigits[i] == 0 && debt == 1) // 10000 - 1 there for second digit debt = 1 and digit = 0 => digit became a 9 (10 - 1);
-                this->_numberDigits[i] = base.getInstance() - 1;
+                this->_numberDigits[i] = static_cast<unsigned char>(base.getInstance() - 1);
             else if(firstNum->_numberDigits[i] != 0 && debt == 1) { // 19990 - 1 there for second digit debt = 1 and digit = 9 => digit = 8 and debt = 0
                 this->_numberDigits[i] = firstNum->_numberDigits[i] - 1;
                 debt = 0;
@@ -473,8 +474,8 @@ BigInt& BigInt::operator*=(const BigInt& num){
         for (unsigned int j = 0; j < maxLen; ++j) {
             unsigned short tmp; // (2^8- 1)^2 + 2^8 < 2^16;
             tmp = (static_cast<unsigned short>(secondNum->_numberDigits[i]) * static_cast<unsigned short>(firstNum->_numberDigits[j])) + carry;
-            temp._numberDigits[j] = static_cast<unsigned short>(tmp % base.getInstance()); // base = 256 -> tmp % base <=255
-            carry = tmp / base.getInstance(); // (2^16-1) / (2^8) <= 2^8-1
+            temp._numberDigits[j] = static_cast<unsigned char>(tmp % base.getInstance()); // base = 256 -> tmp % base <=255
+            carry = static_cast<unsigned char>(tmp / base.getInstance()); // (2^16-1) / (2^8) <= 2^8-1
             if (j == maxLen - 1 && carry != 0 ) {
                 temp._numberDigits[maxLen] = carry; // 12*9  = 108
                 temp._countOfDigits++;
@@ -661,7 +662,7 @@ BigInt::operator int() const{
     unsigned char pos = 0;
     int res = 0;
     while(true){
-        res+= this->_numberDigits[pos]*pow(base.getInstance(),pos);
+        res+= static_cast<int>(this->_numberDigits[pos]*pow(base.getInstance(),pos));
         pos++;
         if(pos == bytesInInt || pos == this->_countOfDigits)
             break;
@@ -674,7 +675,7 @@ BigInt::operator int() const{
             return -res;
     }
 
-    if((res & ( 1 << (sizeof(int)*8-1))) != 0){ // case when last bit = 1;
+    if((res & ( 1 << (sizeof(int)*bitsInByte-1))) != 0){ // case when last bit = 1;
         res -= 1;
         res=~res;
     }
@@ -722,7 +723,7 @@ std::istream& operator>>(std::istream& s, BigInt& i){
             break;
         if (isFirst && (currChar != '-' && !std::isdigit(currChar)))
             break;
-        conStr[0] = currChar;
+        conStr[0] = static_cast<char>(currChar);
         isFirst = false;
         stringToBigInt+=conStr;
     }
